@@ -2,8 +2,8 @@ package composites
 
 import (
 	"stregy/internal/adapters/api"
-	user1 "stregy/internal/adapters/api/user"
-	user2 "stregy/internal/adapters/postgresql/user"
+	user2 "stregy/internal/adapters/api/user"
+	user1 "stregy/internal/adapters/pggorm/user"
 	"stregy/internal/domain/user"
 )
 
@@ -13,10 +13,10 @@ type UserComposite struct {
 	Handler api.Handler
 }
 
-func NewUserComposite(postgreSQLComposite *PostgreSQLComposite) (*UserComposite, error) {
-	storage := user2.NewStorage(postgreSQLComposite.db)
+func NewUserComposite(composite *PGGormComposite) (*UserComposite, error) {
+	storage := user1.NewStorage(composite.db)
 	service := user.NewService(storage)
-	handler := user1.NewHandler(service)
+	handler := user2.NewHandler(service)
 	return &UserComposite{
 		Storage: storage,
 		Service: service,

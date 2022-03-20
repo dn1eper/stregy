@@ -6,7 +6,6 @@ import (
 
 type Service interface {
 	GetByUUID(ctx context.Context, uuid string) (*User, error)
-	GetAll(ctx context.Context, limit, offset int) ([]*User, error)
 	Create(ctx context.Context, dto *CreateUserDTO) (*User, error)
 }
 
@@ -19,13 +18,10 @@ func NewService(storage Storage) Service {
 }
 
 func (s *service) Create(ctx context.Context, dto *CreateUserDTO) (*User, error) {
-	panic("not implemented")
+	user := &User{Name: dto.Name, Email: dto.Email, PassHash: dto.PassHash}
+	return s.storage.Create(ctx, user)
 }
 
 func (s *service) GetByUUID(ctx context.Context, uuid string) (*User, error) {
 	return s.storage.GetOne(ctx, uuid)
-}
-
-func (s *service) GetAll(ctx context.Context, limit, offset int) ([]*User, error) {
-	return s.storage.GetAll(ctx, limit, offset)
 }
