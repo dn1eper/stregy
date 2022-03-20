@@ -1,4 +1,4 @@
-package pggorm
+package pgorm
 
 import (
 	"context"

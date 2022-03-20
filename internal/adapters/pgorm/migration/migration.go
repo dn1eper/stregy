@@ -1,7 +1,7 @@
 package migration
 
 import (
-	"stregy/internal/adapters/pggorm/user"
+	"stregy/internal/adapters/pgorm/user"
 
 	"gorm.io/gorm"
 )
