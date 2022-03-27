@@ -10,18 +10,18 @@ type Service interface {
 }
 
 type service struct {
-	storage Storage
+	repository Repository
 }
 
-func NewService(storage Storage) Service {
-	return &service{storage: storage}
+func NewService(repository Repository) Service {
+	return &service{repository: repository}
 }
 
 func (s *service) Create(ctx context.Context, dto *CreateUserDTO) (*User, error) {
 	user := &User{Name: dto.Name, Email: dto.Email, PassHash: dto.PassHash}
-	return s.storage.Create(ctx, user)
+	return s.repository.Create(ctx, user)
 }
 
 func (s *service) GetByUUID(ctx context.Context, uuid string) (*User, error) {
-	return s.storage.GetOne(ctx, uuid)
+	return s.repository.GetOne(ctx, uuid)
 }

@@ -2,9 +2,13 @@ package app
 
 import (
 	"context"
+	"log"
+	"net"
+	"net/http"
 	"stregy/internal/composites"
 	"stregy/internal/config"
 	"stregy/pkg/logging"
+	"time"
 
 	"github.com/julienschmidt/httprouter"
 )
@@ -12,7 +16,7 @@ import (
 func Run(cfg *config.Config) {
 	logger := logging.GetLogger()
 
-	logger.Info("creater router")
+	logger.Info("router initializing")
 	router := httprouter.New()
 
 	logger.Info("pgorm composite initializing")
@@ -27,4 +31,17 @@ func Run(cfg *config.Config) {
 		logger.Fatal("author composite failed")
 	}
 	userComposite.Handler.Register(router)
+
+	logger.Info("listener initializing")
+	listener, err := net.Listen("tcp", "")
+	if err != nil {
+		panic(err)
+	}
+
+	server := &http.Server{
+		Handler:      router,
+		WriteTimeout: 15 * time.Second,
+		ReadTimeout:  15 * time.Second,
+	}
+	log.Fatalln(server.Serve(listener))
 }

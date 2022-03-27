@@ -1,6 +1,7 @@
 package user
 
 import (
+	"strconv"
 	"stregy/internal/domain/user"
 )
 
@@ -12,5 +13,5 @@ type User struct {
 }
 
 func (u *User) ToDomain() *user.User {
-	return &user.User{UUID: string(u.UUID), Name: u.Name, Email: u.Email, PassHash: u.PassHash}
+	return &user.User{UUID: strconv.FormatInt(u.UUID, 10), Name: u.Name, Email: u.Email, PassHash: u.PassHash}
 }
