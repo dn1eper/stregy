@@ -6,7 +6,7 @@ import (
 )
 
 type Service interface {
-	GetByIntervalPaginate(ctx context.Context, symbol string, start, end time.Time, offset, pageSize int) ([]Quote, error)
+	GetByInterval(ctx context.Context, symbol string, start, end time.Time, offset, pageSize int) ([]Quote, error)
 	Load(ctx context.Context, symbol, filePath, delimiter string) error
 }
 
@@ -18,8 +18,8 @@ func NewService(repository Repository) Service {
 	return &service{repository: repository}
 }
 
-func (s *service) GetByIntervalPaginate(ctx context.Context, symbol string, start, end time.Time, offset, pageSize int) ([]Quote, error) {
-	return s.repository.GetByIntervalPaginate(ctx, symbol, start, end, offset, pageSize)
+func (s *service) GetByInterval(ctx context.Context, symbol string, start, end time.Time, offset, pageSize int) ([]Quote, error) {
+	return s.repository.GetByInterval(ctx, symbol, start, end, offset, pageSize)
 }
 
 func (s *service) Load(ctx context.Context, symbol, filePath, delimiter string) error {

@@ -33,7 +33,7 @@ func Run(cfg *config.Config) {
 	userComposite.Handler.Register(router)
 
 	logger.Info("quote composite initializing")
-	quoteComposite, err := composites.NewQuoteComposite(pgormComposite)
+	_, err = composites.NewQuoteComposite(pgormComposite)
 	if err != nil {
 		logger.Fatal("quote composite failed")
 	}
