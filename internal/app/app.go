@@ -20,17 +20,23 @@ func Run(cfg *config.Config) {
 	router := httprouter.New()
 
 	logger.Info("pgorm composite initializing")
-	PGormComposite, err := composites.NewPGormComposite(context.Background(), cfg.PosgreSQL.Host, cfg.PosgreSQL.Port, cfg.PosgreSQL.Username, cfg.PosgreSQL.Password, cfg.PosgreSQL.Database)
+	pgormComposite, err := composites.NewPGormComposite(context.Background(), cfg.PosgreSQL.Host, cfg.PosgreSQL.Port, cfg.PosgreSQL.Username, cfg.PosgreSQL.Password, cfg.PosgreSQL.Database)
 	if err != nil {
 		logger.Fatal("mongodb composite failed")
 	}
 
 	logger.Info("user composite initializing")
-	userComposite, err := composites.NewUserComposite(PGormComposite)
+	userComposite, err := composites.NewUserComposite(pgormComposite)
 	if err != nil {
-		logger.Fatal("author composite failed")
+		logger.Fatal("user composite failed")
 	}
 	userComposite.Handler.Register(router)
+
+	logger.Info("quote composite initializing")
+	_, err = composites.NewQuoteComposite(pgormComposite)
+	if err != nil {
+		logger.Fatal("quote composite failed")
+	}
 
 	logger.Info("listener initializing")
 	listener, err := net.Listen("tcp", "")
