@@ -10,8 +10,8 @@ import (
 )
 
 const (
-	userURL  = "/user/:user_id"
-	usersURL = "/users"
+	userURL  = "/api/user/:user_id"
+	usersURL = "/api/users"
 )
 
 type handler struct {

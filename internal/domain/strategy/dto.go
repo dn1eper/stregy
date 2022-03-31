@@ -1,7 +1,7 @@
 package strategy
 
 type CreateStrategyDTO struct {
-	Name           string
-	Description    string
-	Implementation []byte
+	Name           string `json:"name"`
+	Description    string `json:"description"`
+	Implementation string `json:"implementation"`
 }

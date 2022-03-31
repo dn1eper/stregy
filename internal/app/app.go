@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net"
 	"net/http"
@@ -38,8 +39,15 @@ func Run(cfg *config.Config) {
 		logger.Fatal("quote composite failed")
 	}
 
+	logger.Info("strategy composite initializing")
+	strategyComposite, err := composites.NewStrategyComposite(pgormComposite)
+	if err != nil {
+		logger.Fatal("strategy composite failed")
+	}
+	strategyComposite.Handler.Register(router)
+
 	logger.Info("listener initializing")
-	listener, err := net.Listen("tcp", "")
+	listener, err := net.Listen("tcp", fmt.Sprintf("%v:%v", cfg.Listen.BindIP, cfg.Listen.Port))
 	if err != nil {
 		panic(err)
 	}

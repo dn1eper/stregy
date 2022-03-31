@@ -6,7 +6,7 @@ import (
 )
 
 type Backtester struct {
-	UUID      string
+	ID        string
 	Strategy  strategy.Strategy
 	StartDate time.Time
 	EndDate   time.Time

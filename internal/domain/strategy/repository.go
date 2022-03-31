@@ -5,7 +5,7 @@ import (
 )
 
 type Repository interface {
-	GetOne(ctx context.Context, uuid string) (*Strategy, error)
-	Delete(ctx context.Context, uuid string) error
-	Create(ctx context.Context, strat *Strategy) (*Strategy, error)
+	GetOne(ctx context.Context, id string) (*Strategy, error)
+	Delete(ctx context.Context, id string) error
+	Create(ctx context.Context, strategy Strategy) (*Strategy, error)
 }

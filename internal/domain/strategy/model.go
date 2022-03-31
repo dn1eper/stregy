@@ -1,12 +1,11 @@
 package strategy
 
+import "stregy/internal/domain/user"
+
 type Strategy struct {
-	UUID           string
+	ID             string
 	Name           string
 	Description    string
-	Implementation []byte
-}
-
-func (s *Strategy) Tic() {
-
+	User           user.User
+	Implementation Implementation
 }

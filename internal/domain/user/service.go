@@ -5,7 +5,7 @@ import (
 )
 
 type Service interface {
-	GetByUUID(ctx context.Context, uuid string) (*User, error)
+	GetByUUID(ctx context.Context, id string) (*User, error)
 	Create(ctx context.Context, dto *CreateUserDTO) (*User, error)
 }
 
@@ -17,8 +17,8 @@ func NewService(repository Repository) Service {
 	return &service{repository: repository}
 }
 
-func (s *service) Create(ctx context.Context, dto *CreateUserDTO) (*User, error) {
-	user := &User{Name: dto.Name, Email: dto.Email, PassHash: dto.PassHash}
+func (s *service) Create(ctx context.Context, dto *CreateUserDTO) (user *User, err error) {
+	user = &User{Name: dto.Name, Email: dto.Email, PassHash: dto.PassHash}
 	return s.repository.Create(ctx, user)
 }
 

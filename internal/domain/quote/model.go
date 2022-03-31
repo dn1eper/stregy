@@ -1,11 +1,15 @@
 package quote
 
-import "time"
+import (
+	"time"
+
+	"github.com/shopspring/decimal"
+)
 
 type Quote struct {
 	Time  time.Time
-	Open  float32
-	High  float32
-	Low   float32
-	Close float32
+	Open  decimal.Decimal
+	High  decimal.Decimal
+	Low   decimal.Decimal
+	Close decimal.Decimal
 }

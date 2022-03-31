@@ -2,10 +2,13 @@ module stregy
 
 go 1.17
 
+require gorm.io/driver/postgres v1.3.1
+
 require (
 	github.com/BurntSushi/toml v0.3.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/go-python/cpy3 v0.0.0-20211127141159-9ab339a58efd // indirect
+	github.com/google/uuid v1.3.0 // indirect
 	github.com/ilyakaznacheev/cleanenv v1.2.6 // indirect
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
 	github.com/jackc/pgconn v1.11.0 // indirect
@@ -20,6 +23,7 @@ require (
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/joho/godotenv v1.3.0 // indirect
 	github.com/julienschmidt/httprouter v1.3.0 // indirect
+	github.com/mitchellh/mapstructure v1.4.3 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/shopspring/decimal v1.3.1 // indirect
 	github.com/sirupsen/logrus v1.8.1 // indirect
@@ -29,7 +33,6 @@ require (
 	golang.org/x/sys v0.0.0-20210615035016-665e8c7367d1 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
-	gorm.io/driver/postgres v1.3.1 // indirect
 	gorm.io/gorm v1.23.3 // indirect
 	olympos.io/encoding/edn v0.0.0-20201019073823-d3554ca0b0a3 // indirect
 )

@@ -1,5 +1,9 @@
 package position
 
+import (
+	"stregy/internal/domain/order"
+)
+
 type PositionStatus int64
 
 const (
@@ -11,5 +15,9 @@ const (
 )
 
 type Position struct {
-	Status PositionStatus
+	Id        string
+	MainOrder order.Order
+	TakeOrder order.Order
+	StopOrder order.Order
+	Status    PositionStatus
 }

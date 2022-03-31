@@ -1,6 +1,7 @@
 package order
 
 import (
+	"stregy/internal/domain/quote"
 	"time"
 
 	"github.com/shopspring/decimal"
@@ -9,7 +10,8 @@ import (
 type OrderStatus int64
 
 const (
-	Submitted OrderStatus = iota
+	Draft OrderStatus = iota
+	Submitted
 	Accepted
 	Partial
 	Completed
@@ -36,7 +38,7 @@ const (
 )
 
 type Order struct {
-	UUID           string
+	ID             string
 	Direction      OrderDirection
 	Size           decimal.Decimal
 	Price          decimal.Decimal
@@ -44,4 +46,9 @@ type Order struct {
 	Type           OrderType
 	ExecutionTime  time.Time
 	ExecutionPrice decimal.Decimal
+}
+
+func (o Order) IsTouched(quote quote.Quote) bool {
+	return o.Direction == Long && o.Price.LessThanOrEqual(quote.High) ||
+		o.Direction == Short && o.Price.GreaterThanOrEqual(quote.Low)
 }

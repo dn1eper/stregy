@@ -7,7 +7,7 @@ type CreateUserDTO struct {
 }
 
 type UpdateUserDTO struct {
-	UUID     string `json:"uuid"`
+	ID       string `json:"id"`
 	Name     string `json:"name"`
 	Email    string `json:"email"`
 	PassHash string `json:"pass_hash"`
