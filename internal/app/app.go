@@ -45,6 +45,11 @@ func Run(cfg *config.Config) {
 		logger.Fatal("strategy composite failed")
 	}
 	strategyComposite.Handler.Register(router)
+	logger.Info("symbol composite initializing")
+	_, err = composites.NewSymbolComposite(pgormComposite)
+	if err != nil {
+		logger.Fatal("symbol composite failed")
+	}
 
 	logger.Info("listener initializing")
 	listener, err := net.Listen("tcp", fmt.Sprintf("%v:%v", cfg.Listen.BindIP, cfg.Listen.Port))

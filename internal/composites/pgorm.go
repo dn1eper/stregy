@@ -13,8 +13,8 @@ type PGormComposite struct {
 }
 
 func NewPGormComposite(ctx context.Context, Host, Port, Username, Password, Database string) (*PGormComposite, error) {
-	client, err := pgorm.NewClient(ctx, Host, Port, Username, Password, Database)
-	migration.Migrate(client)
+	client, _ := pgorm.NewClient(ctx, Host, Port, Username, Password, Database)
+	err := migration.Migrate(client)
 	if err != nil {
 		return nil, err
 	}

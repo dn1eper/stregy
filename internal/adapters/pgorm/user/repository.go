@@ -27,7 +27,7 @@ func (r *repository) GetOne(ctx context.Context, id string) (*user.User, error) 
 }
 
 func (r *repository) Create(ctx context.Context, user *user.User) (*user.User, error) {
-	db_user := &User{Name: user.Name, Email: user.Email, PassHash: user.PassHash}
-	result := r.db.Create(db_user)
-	return db_user.ToDomain(), result.Error
+	dbUser := &User{Name: user.Name, Email: user.Email, PassHash: user.PassHash}
+	result := r.db.Create(dbUser)
+	return dbUser.ToDomain(), result.Error
 }
