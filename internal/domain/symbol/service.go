@@ -6,7 +6,7 @@ import (
 
 type Service interface {
 	Exists(ctx context.Context, name string) bool
-	Create(ctx context.Context, name string) (Symbol, error)
+	Create(ctx context.Context, name string) (*Symbol, error)
 	GetAll(ctx context.Context) ([]Symbol, error)
 }
 
@@ -21,7 +21,7 @@ func NewService(repository Repository) Service {
 func (s *service) Exists(ctx context.Context, name string) bool {
 	return s.repository.Exists(ctx, name)
 }
-func (s *service) Create(ctx context.Context, name string) (Symbol, error) {
+func (s *service) Create(ctx context.Context, name string) (*Symbol, error) {
 	return s.repository.Create(ctx, name)
 }
 
