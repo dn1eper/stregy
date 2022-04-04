@@ -32,7 +32,7 @@ func (r *repository) Create(ctx context.Context, name string) (*symbol.Symbol, e
 	if result.Error != nil {
 		return nil, result.Error
 	}
-	tableName := strings.ToLower(name) + "s"
+	tableName := strings.ToLower(name)
 	r.db.Exec(fmt.Sprintf("CREATE TABLE %vs (LIKE quotes INCLUDING ALL);", tableName))
 	symbolDomain := symbol.ToDomain()
 	return &symbolDomain, result.Error

@@ -10,15 +10,15 @@ import (
 )
 
 type Order struct {
-	OrderID             uuid.UUID `gorm:"primaryKey;type:uuid"`
+	OrderID             uuid.UUID `gorm:"primaryKey;type:uuid;default:uuid_generate_v4()"`
 	StrategyExecution   stratexec.StrategyExecution
 	StrategyExecutionID uuid.UUID
-	Price               decimal.Decimal `gorm:"type:real;not null"`
+	Price               decimal.Decimal `gorm:"type:decimal;not null"`
 	Direction           OrderDirection  `gorm:"type:order_direction"`
-	Size                decimal.Decimal `gorm:"type:real;not null"`
+	Size                decimal.Decimal `gorm:"type:decimal;not null"`
 	Type                OrderType       `gorm:"type:order_type;not null"`
 	ExecutionTime       time.Time       `gorm:"type:timestamp"`
-	ExecutionPrice      decimal.Decimal `gorm:"type:real"`
+	ExecutionPrice      decimal.Decimal `gorm:"type:decimal"`
 	Status              OrderStatus     `gorm:"type:order_status;not null"`
 }
 

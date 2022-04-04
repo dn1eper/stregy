@@ -8,7 +8,7 @@ import (
 )
 
 type ExchangeAccount struct {
-	ExchangeAccountID   uuid.UUID `gorm:"primaryKey;type:uuid"`
+	ExchangeAccountID   uuid.UUID `gorm:"primaryKey;type:uuid;default:uuid_generate_v4()"`
 	Exchange            exchange.Exchange
 	User                user.User
 	ExchangeID          uuid.UUID

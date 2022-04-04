@@ -17,7 +17,7 @@ const (
 )
 
 type Position struct {
-	PositionID  uuid.UUID `gorm:"primaryKey;type:uuid"`
+	PositionID  uuid.UUID `gorm:"type:uuid;primaryKey;default:uuid_generate_v4()"`
 	MainOrder   order.Order
 	TakeOrder   order.Order
 	StopOrder   order.Order
