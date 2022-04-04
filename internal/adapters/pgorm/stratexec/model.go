@@ -17,5 +17,5 @@ type StrategyExecution struct {
 	Timeframe           uint      `gorm:"type:int;not null"`
 	Symbol              string    `gorm:"not null"`
 	StartTime           time.Time `gorm:"type:timestamp;not null"`
-	EndTime             time.Time `gorm:"type:timestamp;not null"`
+	EndTime             time.Time `gorm:"type:timestamp"`
 }
