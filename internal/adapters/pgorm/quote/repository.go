@@ -19,13 +19,13 @@ func NewRepository(client *gorm.DB) quote.Repository {
 	return &repository{db: client}
 }
 
-func (r repository) GetByInterval(ctx context.Context, symbol string, startTime, endTime time.Time, offset, pageSize int) ([]quote.Quote, error) {
+func (r repository) GetByInterval(ctx context.Context, symbol string, startTime, endTime time.Time) ([]quote.Quote, error) {
 	tableName := strings.ToLower(symbol) + "s"
 	startTimeStr := utils.FormatTime(startTime)
 	endTimeStr := utils.FormatTime(endTime)
 
 	quotes := make([]Quote, 0)
-	err := r.db.Table(tableName).Offset(offset).Limit(pageSize).Where("time >= ? AND time <= ?", startTimeStr, endTimeStr).Find(&quotes).Error
+	err := r.db.Table(tableName).Where("time >= ? AND time < ?", startTimeStr, endTimeStr).Find(&quotes).Error
 	if err != nil {
 		return nil, err
 	}
