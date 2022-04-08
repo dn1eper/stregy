@@ -1,61 +1,50 @@
-package user
+package strategy
 
 import (
 	"context"
-	"encoding/json"
 	"net/http"
 	"stregy/internal/adapters/api"
+	"stregy/internal/domain/user"
 	"stregy/pkg/handlers"
 	"stregy/pkg/logging"
 
-	"stregy/internal/domain/strategy"
+	strategy1 "stregy/internal/domain/strategy"
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/mitchellh/mapstructure"
 )
 
 const (
-	strategyURL = "/api/strategy"
+	createStrategyURL = "/api/create-strategy"
 )
 
 type handler struct {
-	strategyService strategy.Service
+	strategyService strategy1.Service
 }
 
-func NewHandler(service strategy.Service) api.Handler {
+func NewHandler(service strategy1.Service) api.Handler {
 	return &handler{strategyService: service}
 }
 
 func (h *handler) Register(router *httprouter.Router) {
-	createStrategyHandler := handlers.JsonHandler(h.CreateStrategy, &strategy.CreateStrategyDTO{})
-	router.POST(strategyURL, createStrategyHandler)
+	createStrategyHandler := handlers.ToSimpleHandler(
+		handlers.JsonHandler(h.CreateStrategy, &strategy1.CreateStrategyDTO{}))
+	router.POST(createStrategyURL, createStrategyHandler)
 }
 
-func (h *handler) CreateStrategy(w http.ResponseWriter, r *http.Request, params httprouter.Params, obj interface{}) {
+func (h *handler) CreateStrategy(w http.ResponseWriter, r *http.Request, params httprouter.Params, args map[string]interface{}) {
 	logger := logging.GetLogger()
 
-	dto := strategy.CreateStrategyDTO{}
-	mapstructure.Decode(obj, &dto)
+	dto := strategy1.CreateStrategyDTO{}
+	mapstructure.Decode(args["json"], &dto)
+	user := user.User{}
+	mapstructure.Decode(args["user"], &user)
 
-	strat, err := h.strategyService.Create(context.TODO(), dto)
+	strat, err := h.strategyService.Create(context.TODO(), dto, &user)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		logger.Error(err.Error())
 	}
-	JsonResponseWriter(w, map[string]string{"strategy_id": strat.ID})
-}
 
-func JsonResponseWriter(w http.ResponseWriter, resp interface{}) {
-	w.WriteHeader(http.StatusInternalServerError)
-	w.Header().Set("Content-Type", "application/json")
-
-	jsonResp, err := json.Marshal(resp)
-	if err != nil {
-		logger := logging.GetLogger()
-		logger.Fatalf("Error happened in JSON marshal. Err: %s", err)
-		w.WriteHeader(http.StatusInternalServerError)
-	} else {
-		w.Write(jsonResp)
-		w.WriteHeader(http.StatusOK)
-	}
+	handlers.JsonResponseWriter(w, map[string]string{"strategy_id": strat.ID})
 }
