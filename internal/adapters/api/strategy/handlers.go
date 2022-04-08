@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	createStrategyURL = "/api/create-strategy"
+	strategyURL = "/api/strategy"
 )
 
 type handler struct {
@@ -29,7 +29,7 @@ func NewHandler(service strategy1.Service) api.Handler {
 func (h *handler) Register(router *httprouter.Router) {
 	createStrategyHandler := handlers.ToSimpleHandler(
 		handlers.JsonHandler(h.CreateStrategy, &strategy1.CreateStrategyDTO{}))
-	router.POST(createStrategyURL, createStrategyHandler)
+	router.POST(strategyURL, createStrategyHandler)
 }
 
 func (h *handler) CreateStrategy(w http.ResponseWriter, r *http.Request, params httprouter.Params, args map[string]interface{}) {

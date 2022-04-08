@@ -5,8 +5,12 @@ import (
 	"path/filepath"
 )
 
-func CreateStratRepo(userID string, strategyID string) (string, error) {
+// Creates subdirectory in the current project.
+func CreateDir(directories []string) (string, error) {
+	directoriesWithWd := make([]string, len(directories)+1)
+	copy(directoriesWithWd[1:], directories)
 	wd, _ := os.Getwd()
-	newStratRepoPath := filepath.Join(wd, "repository", "strategies", userID, strategyID)
+	directoriesWithWd[0] = wd
+	newStratRepoPath := filepath.Join(directoriesWithWd...)
 	return newStratRepoPath, os.MkdirAll(newStratRepoPath, os.ModePerm)
 }

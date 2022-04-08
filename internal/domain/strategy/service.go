@@ -2,11 +2,7 @@ package strategy
 
 import (
 	"context"
-	"encoding/base64"
-	"os"
-	"path/filepath"
 	"stregy/internal/domain/user"
-	"stregy/pkg/utils"
 )
 
 type Service interface {
@@ -16,29 +12,20 @@ type Service interface {
 
 type service struct {
 	repository Repository
+	storage    Storage
 }
 
-func NewService(repository Repository) Service {
-	return &service{repository: repository}
+func NewService(repository Repository, storage Storage) Service {
+	return &service{repository: repository, storage: storage}
 }
 
 func (s *service) Create(ctx context.Context, dto CreateStrategyDTO, user *user.User) (strategy *Strategy, err error) {
 	strategy = &Strategy{Name: dto.Name, Description: dto.Description}
-
 	strategy, err = s.repository.Create(ctx, *strategy)
 	if err != nil {
 		return nil, err
 	}
-
-	dec, _ := base64.StdEncoding.DecodeString(dto.Implementation)
-	dirpath, _ := utils.CreateStratRepo(user.ID, strategy.ID)
-	f, err := os.Create(filepath.Join(dirpath, "strategy"))
-	defer f.Close()
-	if err != nil {
-		return nil, err
-	}
-	f.Write(dec)
-
+	s.storage.SaveStrategy(dto.Implementation, user.ID, strategy.ID)
 	return strategy, nil
 }
 
