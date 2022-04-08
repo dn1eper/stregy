@@ -16,6 +16,6 @@ func NewMockedRepository() quote.Repository {
 	return new(MockedRepository)
 }
 
-func (r *MockedRepository) GetByInterval(ctx context.Context, symbol string, startTime, endTime time.Time, offset, pageSize int) ([]quote.Quote, error) {
+func (r *MockedRepository) GetByInterval(ctx context.Context, symbol string, start_time, end_time time.Time) ([]quote.Quote, error) {
 	panic("not implemented")
 }

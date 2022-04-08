@@ -6,5 +6,5 @@ import (
 )
 
 type Repository interface {
-	GetByInterval(ctx context.Context, symbol string, start_time, end_time time.Time, offset, pageSize int) ([]Quote, error)
+	GetByInterval(ctx context.Context, symbol string, start_time, end_time time.Time) ([]Quote, error)
 }
