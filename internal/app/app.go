@@ -45,6 +45,14 @@ func Run(cfg *config.Config) {
 		logger.Fatal("strategy composite failed")
 	}
 	strategyComposite.Handler.Register(router)
+
+	logger.Info("exchange account composite initializing")
+	exgAccount, err := composites.NewExchangeAccountComposite(pgormComposite, userComposite.Service)
+	if err != nil {
+		logger.Fatal("exchange account composite failed")
+	}
+	exgAccount.Handler.Register(router)
+
 	logger.Info("symbol composite initializing")
 	_, err = composites.NewSymbolComposite(pgormComposite)
 	if err != nil {

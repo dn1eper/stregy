@@ -6,6 +6,7 @@ import (
 
 type Service interface {
 	GetByUUID(ctx context.Context, id string) (*User, error)
+	GetByAPIKey(ctx context.Context, apiKey string) (*User, error)
 	Create(ctx context.Context, dto *CreateUserDTO) (*User, error)
 }
 
@@ -24,4 +25,8 @@ func (s *service) Create(ctx context.Context, dto *CreateUserDTO) (user *User, e
 
 func (s *service) GetByUUID(ctx context.Context, uuid string) (*User, error) {
 	return s.repository.GetOne(ctx, uuid)
+}
+
+func (s *service) GetByAPIKey(ctx context.Context, apiKey string) (*User, error) {
+	return s.repository.GetByAPIKey(ctx, apiKey)
 }

@@ -31,3 +31,16 @@ func (r *repository) Create(ctx context.Context, user *user.User) (*user.User, e
 	result := r.db.Create(dbUser)
 	return dbUser.ToDomain(), result.Error
 }
+
+func (r *repository) GetByAPIKey(ctx context.Context, apiKey string) (*user.User, error) {
+	apiUUID, err := uuid.Parse(apiKey)
+	if err != nil {
+		return nil, err
+	}
+	user := &User{APIKey: apiUUID}
+	result := r.db.First(user)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return user.ToDomain(), nil
+}

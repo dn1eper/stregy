@@ -12,10 +12,17 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-type JsonHandle func(http.ResponseWriter, *http.Request, httprouter.Params, interface{})
+type HandleWithArgs func(http.ResponseWriter, *http.Request, httprouter.Params, map[string]interface{})
 
-func JsonHandler(h JsonHandle, dst interface{}) httprouter.Handle {
-	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func ToSimpleHandler(hwa HandleWithArgs) httprouter.Handle {
+	return func(rw http.ResponseWriter, r *http.Request, p httprouter.Params) {
+		args := map[string]interface{}{}
+		hwa(rw, r, p, args)
+	}
+}
+
+func JsonHandler(h HandleWithArgs, dst interface{}) HandleWithArgs {
+	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params, args map[string]interface{}) {
 		contentType := r.Header.Get("Content-Type")
 
 		if contentType != "" {
@@ -75,6 +82,7 @@ func JsonHandler(h JsonHandle, dst interface{}) httprouter.Handle {
 			return
 		}
 
-		h(w, r, ps, dst)
+		args["json"] = dst
+		h(w, r, ps, args)
 	}
 }

@@ -27,7 +27,7 @@ func (r *repository) GetOne(ctx context.Context, id string) (*strategy.Strategy,
 }
 
 func (r *repository) Create(ctx context.Context, strategy strategy.Strategy) (*strategy.Strategy, error) {
-	db_strategy := &Strategy{}
+	db_strategy := &Strategy{Name: strategy.Name, Description: strategy.Description}
 	result := r.db.Create(db_strategy)
 	return db_strategy.ToDomain(), result.Error
 }

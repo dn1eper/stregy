@@ -6,6 +6,7 @@ import (
 	"stregy/internal/adapters/pgorm/order"
 	"stregy/internal/adapters/pgorm/position"
 	"stregy/internal/adapters/pgorm/quote"
+	"stregy/internal/adapters/pgorm/strategy"
 	"stregy/internal/adapters/pgorm/stratexec"
 	"stregy/internal/adapters/pgorm/symbol"
 	"stregy/internal/adapters/pgorm/user"
@@ -35,6 +36,6 @@ func Migrate(db *gorm.DB) error {
 		return err
 	}
 	return db.AutoMigrate(&user.User{}, &symbol.Symbol{}, &quote.Quote{},
-		&exchange.Exchange{}, &exgaccount.ExchangeAccount{},
+		&exchange.Exchange{}, &exgaccount.ExchangeAccount{}, &strategy.Strategy{},
 		&stratexec.StrategyExecution{}, &order.Order{}, &position.Position{})
 }
