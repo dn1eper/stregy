@@ -53,6 +53,14 @@ func Run(cfg *config.Config) {
 	}
 	exgAccount.Handler.Register(router)
 
+	logger.Info("strategy execution composite initializing")
+	strategyExecutionComposite, err :=
+		composites.NewStrategyExecutionComposite(pgormComposite, userComposite.Service, exgAccount.Service)
+	if err != nil {
+		logger.Fatal("strategy execution composite failed")
+	}
+	strategyExecutionComposite.Handler.Register(router)
+
 	logger.Info("symbol composite initializing")
 	_, err = composites.NewSymbolComposite(pgormComposite)
 	if err != nil {

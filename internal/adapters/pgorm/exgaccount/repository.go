@@ -55,3 +55,13 @@ func (r *repository) GetAll(ctx context.Context, userID string) ([]*exgaccount.E
 	}
 	return exgAccountsDomain, nil
 }
+
+func (r *repository) GetUserID(ctx context.Context, exgAccountID string) string {
+	uuid, _ := uuid.Parse(exgAccountID)
+	exgAccount := ExchangeAccount{ExchangeAccountID: uuid}
+	err := r.db.First(&exgAccount).Error
+	if err != nil {
+		return ""
+	}
+	return exgAccount.UserID.String()
+}
