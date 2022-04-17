@@ -18,8 +18,12 @@ type service struct {
 	positions []*position.Position
 }
 
-func NewService(repository Repository, quoteService quote.Service) Service {
-	return &service{repository: repository, quoteService: quoteService}
+func NewService(repository Repository, quoteService quote.Service, positionService position.Service) Service {
+	return &service{
+		repository:      repository,
+		quoteService:    quoteService,
+		positionService: positionService,
+	}
 }
 
 func (s *service) Run(ctx context.Context, b *Backtester) (err error) {

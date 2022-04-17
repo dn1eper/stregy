@@ -3,6 +3,7 @@ package backtester
 import (
 	"context"
 	"stregy/internal/domain/backtester"
+	"stregy/test/position"
 	"stregy/test/quote"
 	"testing"
 	"time"
@@ -10,7 +11,7 @@ import (
 
 func NewMockedService() backtester.Service {
 	repository := NewMockedRepository()
-	return backtester.NewService(repository, quote.NewMockedService())
+	return backtester.NewService(repository, quote.NewMockedService(), position.NewMockedService())
 }
 
 func TestRunBacktester(t *testing.T) {

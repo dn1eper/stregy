@@ -25,8 +25,9 @@ func (r *repository) Create(ctx context.Context, se stratexec.StrategyExecution)
 		ExchangeAccountID: exchangeAccountID,
 		Timeframe:         se.Timeframe,
 		Symbol:            se.Symbol,
-		StartTime:         se.StartTime,
-		EndTime:           se.EndTime,
+		StartTime:         se.StartDate,
+		EndTime:           se.EndDate,
+		Status:            StrategyExecutionStatus(se.Status),
 	}
 	result := r.db.Create(db_se)
 	return db_se.ToDomain(), result.Error

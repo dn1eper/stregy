@@ -11,4 +11,5 @@ type Backtester struct {
 	StartDate time.Time
 	EndDate   time.Time
 	Symbol    string
+	Timeframe int
 }
