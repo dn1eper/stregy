@@ -9,7 +9,6 @@ import (
 	"stregy/internal/domain/backtester"
 	"stregy/internal/domain/exgaccount"
 	"stregy/internal/domain/strategy"
-	"stregy/internal/domain/stratexec"
 	"stregy/internal/domain/user"
 	"stregy/pkg/handlers"
 	"stregy/pkg/logging"
@@ -25,7 +24,6 @@ const (
 
 type handler struct {
 	backtesterService backtester.Service
-	stratExecService  stratexec.Service
 	exgAccService     exgaccount.Service
 	strategyService   strategy.Service
 	userService       user.Service
@@ -33,14 +31,12 @@ type handler struct {
 
 func NewHandler(
 	backtesterService backtester.Service,
-	stratExecService stratexec.Service,
 	exgAccService exgaccount.Service,
 	strategyService strategy.Service,
 	userService user.Service,
 ) api.Handler {
 	return &handler{
 		backtesterService: backtesterService,
-		stratExecService:  stratExecService,
 		exgAccService:     exgAccService,
 		strategyService:   strategyService,
 		userService:       userService,
@@ -77,16 +73,16 @@ func (h *handler) Backtest(
 	timeframe, _ := strconv.Atoi(dto.Timeframe)
 	startDate, _ := time.Parse("2006-01-02", dto.StartDate)
 	endDate, _ := time.Parse("2006-01-02", dto.EndDate)
-	se := &stratexec.StrategyExecution{
-		StrategyID:        dto.StrategyID,
-		ExchangeAccountID: dto.ExchangeAccountID,
-		Timeframe:         timeframe,
-		Symbol:            dto.Symbol,
-		StartDate:         startDate,
-		EndDate:           endDate,
-		Status:            stratexec.Created,
+	strat, err := h.strategyService.GetByUUID(context.TODO(), dto.StrategyID)
+	backtester := backtester.Backtester{
+		Strategy:  *strat,
+		StartDate: startDate,
+		EndDate:   endDate,
+		Symbol:    dto.Symbol,
+		Timeframe: timeframe,
+		Status:    backtester.Created,
 	}
-	se, err := h.stratExecService.Create(context.TODO(), *se, &user)
+	backtesterDB, err := h.backtesterService.Create(context.TODO(), backtester, dto.StrategyID, dto.ExchangeAccountID)
 	if err != nil {
 		logger.Error(err.Error())
 		api.ReturnError(w, "")
@@ -94,19 +90,13 @@ func (h *handler) Backtest(
 	}
 
 	// Execute.
-	strat, err := h.strategyService.GetByUUID(context.TODO(), dto.StrategyID)
-	backtester := backtester.Backtester{
-		Strategy:  *strat,
-		StartDate: startDate,
-		EndDate:   endDate,
-		Symbol:    dto.Symbol,
-	}
-	err = h.backtesterService.Run(context.TODO(), &backtester)
+
+	err = h.backtesterService.Run(context.TODO(), backtesterDB)
 	if err != nil {
 		logger.Error(err.Error())
 		api.ReturnError(w, err.Error())
 		return
 	}
 
-	handlers.JsonResponseWriter(w, map[string]string{"strategy_execution_id": se.ID})
+	handlers.JsonResponseWriter(w, map[string]string{"strategy_execution_id": backtesterDB.ID})
 }

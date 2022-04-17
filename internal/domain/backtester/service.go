@@ -8,6 +8,7 @@ import (
 
 type Service interface {
 	Run(ctx context.Context, b *Backtester) error
+	Create(ctx context.Context, bt Backtester, strategyID string, exchangeAccountID string) (*Backtester, error)
 }
 
 type service struct {
@@ -24,6 +25,10 @@ func NewService(repository Repository, quoteService quote.Service, positionServi
 		quoteService:    quoteService,
 		positionService: positionService,
 	}
+}
+
+func (s *service) Create(ctx context.Context, bt Backtester, strategyID string, exchangeAccountID string) (*Backtester, error) {
+	return s.repository.CreateBacktester(ctx, bt, strategyID, exchangeAccountID)
 }
 
 func (s *service) Run(ctx context.Context, b *Backtester) (err error) {

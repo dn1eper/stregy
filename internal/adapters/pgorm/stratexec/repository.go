@@ -2,7 +2,7 @@ package stratexec
 
 import (
 	"context"
-	"stregy/internal/domain/stratexec"
+	"stregy/internal/domain/backtester"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -12,23 +12,28 @@ type repository struct {
 	db *gorm.DB
 }
 
-func NewRepository(client *gorm.DB) stratexec.Repository {
+func NewRepository(client *gorm.DB) *repository {
 	return &repository{db: client}
 }
 
-func (r *repository) Create(ctx context.Context, se stratexec.StrategyExecution) (*stratexec.StrategyExecution, error) {
-	strategyID, _ := uuid.Parse(se.StrategyID)
-	exchangeAccountID, _ := uuid.Parse(se.ExchangeAccountID)
+func (r *repository) CreateBacktester(ctx context.Context, bt backtester.Backtester, strategyID string, exchangeAccountID string) (*backtester.Backtester, error) {
+	strategyIDParsed, _ := uuid.Parse(strategyID)
+	exchangeAccountIDParsed, _ := uuid.Parse(exchangeAccountID)
 
-	db_se := &StrategyExecution{
-		StrategyID:        strategyID,
-		ExchangeAccountID: exchangeAccountID,
-		Timeframe:         se.Timeframe,
-		Symbol:            se.Symbol,
-		StartTime:         se.StartDate,
-		EndTime:           se.EndDate,
-		Status:            StrategyExecutionStatus(se.Status),
+	se := &StrategyExecution{
+		StrategyID:        strategyIDParsed,
+		ExchangeAccountID: exchangeAccountIDParsed,
+		Timeframe:         bt.Timeframe,
+		Symbol:            bt.Symbol,
+		StartTime:         bt.StartDate,
+		EndTime:           bt.EndDate,
+		Status:            StrategyExecutionStatus(bt.Status),
 	}
-	result := r.db.Create(db_se)
-	return db_se.ToDomain(), result.Error
+	result := r.db.Create(se)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	bt.ID = se.StrategyExecutionID.String()
+	return &bt, nil
 }

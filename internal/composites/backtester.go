@@ -9,7 +9,6 @@ import (
 	"stregy/internal/domain/position"
 	"stregy/internal/domain/quote"
 	"stregy/internal/domain/strategy"
-	"stregy/internal/domain/stratexec"
 	"stregy/internal/domain/user"
 )
 
@@ -20,7 +19,6 @@ type BacktesterComposite struct {
 
 func NewBacktesterComposite(
 	pgormComposite *PGormComposite,
-	stratExecService stratexec.Service,
 	exgAccService exgaccount.Service,
 	strategyService strategy.Service,
 	userService user.Service,
@@ -29,7 +27,7 @@ func NewBacktesterComposite(
 ) (*BacktesterComposite, error) {
 	repository := stratexec1.NewRepository(pgormComposite.db)
 	service := backtester.NewService(repository, quoteService, positionService)
-	handler := backtester1.NewHandler(service, stratExecService, exgAccService, strategyService, userService)
+	handler := backtester1.NewHandler(service, exgAccService, strategyService, userService)
 	return &BacktesterComposite{
 		Service: service,
 		Handler: handler,

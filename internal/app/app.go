@@ -53,13 +53,6 @@ func Run(cfg *config.Config) {
 	}
 	exgAccountComposite.Handler.Register(router)
 
-	logger.Info("strategy execution composite initializing")
-	strategyExecutionComposite, err :=
-		composites.NewStrategyExecutionComposite(pgormComposite)
-	if err != nil {
-		logger.Fatal("strategy execution composite failed")
-	}
-
 	logger.Info("symbol composite initializing")
 	_, err = composites.NewSymbolComposite(pgormComposite)
 	if err != nil {
@@ -80,10 +73,9 @@ func Run(cfg *config.Config) {
 
 	logger.Info("backtester composite initializing")
 	backtesterComposite, err := composites.NewBacktesterComposite(
-		pgormComposite, strategyExecutionComposite.Service,
-		exgAccountComposite.Service, strategyComposite.Service,
-		userComposite.Service, quoteComposite.Service,
-		positionComposite.Service,
+		pgormComposite, exgAccountComposite.Service,
+		strategyComposite.Service, userComposite.Service,
+		quoteComposite.Service, positionComposite.Service,
 	)
 	if err != nil {
 		logger.Fatal("backtester composite failed")
