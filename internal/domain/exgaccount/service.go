@@ -8,6 +8,7 @@ import (
 type Service interface {
 	Create(ctx context.Context, dto CreateExchangeAccountDTO, user *user.User) (*ExchangeAccount, error)
 	GetAll(ctx context.Context, userID string) ([]*ExchangeAccount, error)
+	GetOne(ctx context.Context, exgAccountID string) (*ExchangeAccount, error)
 }
 
 type service struct {
@@ -35,4 +36,8 @@ func (s *service) Create(ctx context.Context, dto CreateExchangeAccountDTO, user
 
 func (s *service) GetAll(ctx context.Context, userID string) ([]*ExchangeAccount, error) {
 	return s.repository.GetAll(ctx, userID)
+}
+
+func (s *service) GetOne(ctx context.Context, exgAccountID string) (*ExchangeAccount, error) {
+	return s.repository.GetOne(ctx, exgAccountID)
 }

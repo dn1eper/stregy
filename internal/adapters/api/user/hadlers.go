@@ -28,7 +28,9 @@ func NewHandler(service user.Service) api.Handler {
 }
 
 func (h *handler) Register(router *httprouter.Router) {
-	router.POST(createUserURL, handlers.ToSimpleHandler(handlers.JsonHandler(h.CreateUser, user.CreateUserDTO{})))
+	jsonHandler := handlers.JsonHandler(h.CreateUser, user.CreateUserDTO{})
+	handler := handlers.ToSimpleHandler(jsonHandler)
+	router.POST(createUserURL, handler)
 	// TODO: add more routes
 
 }
@@ -48,7 +50,7 @@ func (h *handler) CreateUser(w http.ResponseWriter, r *http.Request, params http
 	handlers.JsonResponseWriter(w, map[string]string{"user_id": user.ID, "api_key": user.APIKey})
 }
 
-func APIKeyHandler(h handlers.HandleWithArgs, s user.Service) handlers.HandleWithArgs {
+func AuthenticationHandler(h handlers.HandleWithArgs, s user.Service) handlers.HandleWithArgs {
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params, args map[string]interface{}) {
 		apiKey := r.Header.Get("X-API-Key")
 		if apiKey == "" {

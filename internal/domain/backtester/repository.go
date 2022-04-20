@@ -1,3 +1,9 @@
 package backtester
 
-type Repository interface{}
+import (
+	"context"
+)
+
+type Repository interface {
+	CreateBacktester(ctx context.Context, backtester Backtester) (*Backtester, error)
+}

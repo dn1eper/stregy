@@ -2,24 +2,54 @@ package backtester
 
 import (
 	"context"
+	"stregy/internal/domain/exgaccount"
 	"stregy/internal/domain/position"
 	"stregy/internal/domain/quote"
+	"stregy/internal/domain/strategy"
 )
 
 type Service interface {
 	Run(ctx context.Context, b *Backtester) error
+	Create(ctx context.Context, dto BacktesterDTO, userID string) (*Backtester, error)
 }
 
 type service struct {
 	repository      Repository
 	quoteService    quote.Service
+	exgAccService   exgaccount.Service
+	strategyService strategy.Service
 	positionService position.Service
 
 	positions []*position.Position
 }
 
-func NewService(repository Repository, quoteService quote.Service) Service {
-	return &service{repository: repository, quoteService: quoteService}
+func NewService(
+	repository Repository,
+	quoteService quote.Service,
+	exgAccService exgaccount.Service,
+	positionService position.Service,
+	strategyService strategy.Service,
+) Service {
+	return &service{
+		repository:      repository,
+		quoteService:    quoteService,
+		exgAccService:   exgAccService,
+		strategyService: strategyService,
+		positionService: positionService,
+	}
+}
+
+func (s *service) Create(ctx context.Context, dto BacktesterDTO, userID string) (*Backtester, error) {
+	strat := strategy.Strategy{ID: dto.StrategyID}
+	bt := Backtester{
+		Strategy:  strat,
+		StartDate: dto.StartDate,
+		EndDate:   dto.EndDate,
+		Symbol:    dto.Symbol,
+		Timeframe: dto.Timeframe,
+		Status:    Created,
+	}
+	return s.repository.CreateBacktester(ctx, bt)
 }
 
 func (s *service) Run(ctx context.Context, b *Backtester) (err error) {
