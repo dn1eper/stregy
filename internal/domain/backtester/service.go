@@ -2,12 +2,10 @@ package backtester
 
 import (
 	"context"
-	"errors"
 	"stregy/internal/domain/exgaccount"
 	"stregy/internal/domain/position"
 	"stregy/internal/domain/quote"
 	"stregy/internal/domain/strategy"
-	"time"
 )
 
 type Service interface {
@@ -42,26 +40,16 @@ func NewService(
 }
 
 func (s *service) Create(ctx context.Context, dto BacktesterDTO, userID string) (*Backtester, error) {
-	exgAccount, err := s.exgAccService.GetOne(context.TODO(), dto.ExchangeAccountID)
-	if err != nil {
-		return nil, err
-	}
-	if userID != exgAccount.UserID {
-		return nil, errors.New("incorrect exchange account id")
-	}
-
-	startDate, _ := time.Parse("2006-01-02", dto.StartDate)
-	endDate, _ := time.Parse("2006-01-02", dto.EndDate)
-	strat, err := s.strategyService.GetByUUID(context.TODO(), dto.StrategyID)
+	strat := strategy.Strategy{ID: dto.StrategyID}
 	bt := Backtester{
-		Strategy:  *strat,
-		StartDate: startDate,
-		EndDate:   endDate,
+		Strategy:  strat,
+		StartDate: dto.StartDate,
+		EndDate:   dto.EndDate,
 		Symbol:    dto.Symbol,
 		Timeframe: dto.Timeframe,
 		Status:    Created,
 	}
-	return s.repository.CreateBacktester(ctx, bt, dto.ExchangeAccountID)
+	return s.repository.CreateBacktester(ctx, bt)
 }
 
 func (s *service) Run(ctx context.Context, b *Backtester) (err error) {

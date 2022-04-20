@@ -25,7 +25,7 @@ type StrategyExecution struct {
 	Strategy            strategy.Strategy
 	StrategyID          uuid.UUID
 	ExchangeAccount     exgaccount.ExchangeAccount
-	ExchangeAccountID   uuid.UUID
+	ExchangeAccountID   *uuid.UUID
 	Timeframe           int                     `gorm:"type:int;not null;check:timeframe > 0"`
 	Symbol              string                  `gorm:"not null"`
 	StartTime           time.Time               `gorm:"type:timestamp;not null"`

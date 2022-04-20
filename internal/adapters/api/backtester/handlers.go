@@ -10,6 +10,7 @@ import (
 	"stregy/internal/domain/user"
 	"stregy/pkg/handlers"
 	"stregy/pkg/logging"
+	"time"
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/mitchellh/mapstructure"
@@ -36,7 +37,7 @@ func NewHandler(
 }
 
 func (h *handler) Register(router *httprouter.Router) {
-	createSEHandler := handlers.JsonHandler(h.ExecuteBacktestHandler, &backtester.BacktesterDTO{})
+	createSEHandler := handlers.JsonHandler(h.ExecuteBacktestHandler, &BacktesterDTO{})
 	userHandler := userapi.AuthenticationHandler(createSEHandler, h.userService)
 	router.POST(strategyExecutionURL, handlers.ToSimpleHandler(userHandler))
 }
@@ -51,11 +52,20 @@ func (h *handler) ExecuteBacktestHandler(
 	// Parse and validate request.
 	user := user.User{}
 	mapstructure.Decode(args["user"], &user)
-	dto := backtester.BacktesterDTO{}
-	mapstructure.Decode(args["json"], &dto)
+	apiDTO := BacktesterDTO{}
+	mapstructure.Decode(args["json"], &apiDTO)
 
 	// Create db record.
-	backtesterDB, err := h.backtesterService.Create(context.TODO(), dto, user.ID)
+	startDate, _ := time.Parse("2006-01-02", apiDTO.StartDate)
+	endDate, _ := time.Parse("2006-01-02", apiDTO.EndDate)
+	domainDTO := backtester.BacktesterDTO{
+		StrategyID: apiDTO.StrategyID,
+		Timeframe:  apiDTO.Timeframe,
+		Symbol:     apiDTO.Symbol,
+		StartDate:  startDate,
+		EndDate:    endDate,
+	}
+	backtesterDB, err := h.backtesterService.Create(context.TODO(), domainDTO, user.ID)
 	if err != nil {
 		logger.Error(err.Error())
 		handlers.ReturnError(w, http.StatusInternalServerError, "")

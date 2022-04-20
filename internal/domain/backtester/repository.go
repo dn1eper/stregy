@@ -5,5 +5,5 @@ import (
 )
 
 type Repository interface {
-	CreateBacktester(ctx context.Context, backtester Backtester, exchangeAccountID string) (*Backtester, error)
+	CreateBacktester(ctx context.Context, backtester Backtester) (*Backtester, error)
 }
