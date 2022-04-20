@@ -16,8 +16,8 @@ func NewRepository(client *gorm.DB) *repository {
 	return &repository{db: client}
 }
 
-func (r *repository) CreateBacktester(ctx context.Context, bt backtester.Backtester, strategyID string, exchangeAccountID string) (*backtester.Backtester, error) {
-	strategyIDParsed, _ := uuid.Parse(strategyID)
+func (r *repository) CreateBacktester(ctx context.Context, bt backtester.Backtester, exchangeAccountID string) (*backtester.Backtester, error) {
+	strategyIDParsed, _ := uuid.Parse(bt.Strategy.ID)
 	exchangeAccountIDParsed, _ := uuid.Parse(exchangeAccountID)
 
 	se := &StrategyExecution{

@@ -2,33 +2,66 @@ package backtester
 
 import (
 	"context"
+	"errors"
+	"stregy/internal/domain/exgaccount"
 	"stregy/internal/domain/position"
 	"stregy/internal/domain/quote"
+	"stregy/internal/domain/strategy"
+	"time"
 )
 
 type Service interface {
 	Run(ctx context.Context, b *Backtester) error
-	Create(ctx context.Context, bt Backtester, strategyID string, exchangeAccountID string) (*Backtester, error)
+	Create(ctx context.Context, dto BacktesterDTO, userID string) (*Backtester, error)
 }
 
 type service struct {
 	repository      Repository
 	quoteService    quote.Service
+	exgAccService   exgaccount.Service
+	strategyService strategy.Service
 	positionService position.Service
 
 	positions []*position.Position
 }
 
-func NewService(repository Repository, quoteService quote.Service, positionService position.Service) Service {
+func NewService(
+	repository Repository,
+	quoteService quote.Service,
+	exgAccService exgaccount.Service,
+	positionService position.Service,
+	strategyService strategy.Service,
+) Service {
 	return &service{
 		repository:      repository,
 		quoteService:    quoteService,
+		exgAccService:   exgAccService,
+		strategyService: strategyService,
 		positionService: positionService,
 	}
 }
 
-func (s *service) Create(ctx context.Context, bt Backtester, strategyID string, exchangeAccountID string) (*Backtester, error) {
-	return s.repository.CreateBacktester(ctx, bt, strategyID, exchangeAccountID)
+func (s *service) Create(ctx context.Context, dto BacktesterDTO, userID string) (*Backtester, error) {
+	exgAccount, err := s.exgAccService.GetOne(context.TODO(), dto.ExchangeAccountID)
+	if err != nil {
+		return nil, err
+	}
+	if userID != exgAccount.UserID {
+		return nil, errors.New("incorrect exchange account id")
+	}
+
+	startDate, _ := time.Parse("2006-01-02", dto.StartDate)
+	endDate, _ := time.Parse("2006-01-02", dto.EndDate)
+	strat, err := s.strategyService.GetByUUID(context.TODO(), dto.StrategyID)
+	bt := Backtester{
+		Strategy:  *strat,
+		StartDate: startDate,
+		EndDate:   endDate,
+		Symbol:    dto.Symbol,
+		Timeframe: dto.Timeframe,
+		Status:    Created,
+	}
+	return s.repository.CreateBacktester(ctx, bt, dto.ExchangeAccountID)
 }
 
 func (s *service) Run(ctx context.Context, b *Backtester) (err error) {

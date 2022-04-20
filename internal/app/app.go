@@ -40,7 +40,7 @@ func Run(cfg *config.Config) {
 	}
 
 	logger.Info("strategy composite initializing")
-	strategyComposite, err := composites.NewStrategyComposite(pgormComposite)
+	strategyComposite, err := composites.NewStrategyComposite(pgormComposite, userComposite.Service)
 	if err != nil {
 		logger.Fatal("strategy composite failed")
 	}

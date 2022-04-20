@@ -26,8 +26,8 @@ func NewBacktesterComposite(
 	positionService position.Service,
 ) (*BacktesterComposite, error) {
 	repository := stratexec1.NewRepository(pgormComposite.db)
-	service := backtester.NewService(repository, quoteService, positionService)
-	handler := backtester1.NewHandler(service, exgAccService, strategyService, userService)
+	service := backtester.NewService(repository, quoteService, exgAccService, positionService, strategyService)
+	handler := backtester1.NewHandler(service, userService)
 	return &BacktesterComposite{
 		Service: service,
 		Handler: handler,

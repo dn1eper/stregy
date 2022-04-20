@@ -5,3 +5,8 @@ type CreateExchangeAccountDTO struct {
 	ConnectionString string `json:"connection_string"`
 	Name             string `json:"name"`
 }
+
+type GetExchangeAccountDTO struct {
+	ConnectionString string `json:"connection_string"`
+	Name             string `json:"name"`
+}

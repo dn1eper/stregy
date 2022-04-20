@@ -1,18 +1,15 @@
-package stratexec
+package backtester
 
 import (
 	"context"
 	"net/http"
-	"strconv"
 	"stregy/internal/adapters/api"
 	userapi "stregy/internal/adapters/api/user"
 	"stregy/internal/domain/backtester"
 	"stregy/internal/domain/exgaccount"
-	"stregy/internal/domain/strategy"
 	"stregy/internal/domain/user"
 	"stregy/pkg/handlers"
 	"stregy/pkg/logging"
-	"time"
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/mitchellh/mapstructure"
@@ -25,31 +22,26 @@ const (
 type handler struct {
 	backtesterService backtester.Service
 	exgAccService     exgaccount.Service
-	strategyService   strategy.Service
 	userService       user.Service
 }
 
 func NewHandler(
 	backtesterService backtester.Service,
-	exgAccService exgaccount.Service,
-	strategyService strategy.Service,
 	userService user.Service,
 ) api.Handler {
 	return &handler{
 		backtesterService: backtesterService,
-		exgAccService:     exgAccService,
-		strategyService:   strategyService,
 		userService:       userService,
 	}
 }
 
 func (h *handler) Register(router *httprouter.Router) {
-	createSEHandler := handlers.JsonHandler(h.Backtest, &backtester.BacktestDTO{})
-	userHandler := handlers.ToSimpleHandler(userapi.APIKeyHandler(createSEHandler, h.userService))
-	router.POST(strategyExecutionURL, userHandler)
+	createSEHandler := handlers.JsonHandler(h.ExecuteBacktestHandler, &backtester.BacktesterDTO{})
+	userHandler := userapi.AuthenticationHandler(createSEHandler, h.userService)
+	router.POST(strategyExecutionURL, handlers.ToSimpleHandler(userHandler))
 }
 
-func (h *handler) Backtest(
+func (h *handler) ExecuteBacktestHandler(
 	w http.ResponseWriter,
 	r *http.Request,
 	params httprouter.Params,
@@ -59,42 +51,22 @@ func (h *handler) Backtest(
 	// Parse and validate request.
 	user := user.User{}
 	mapstructure.Decode(args["user"], &user)
-	dto := backtester.BacktestDTO{}
+	dto := backtester.BacktesterDTO{}
 	mapstructure.Decode(args["json"], &dto)
 
-	userID := h.exgAccService.GetUserID(context.TODO(), dto.ExchangeAccountID)
-	if userID != user.ID {
-		logger.Error("incorrect exchange account id")
-		api.ReturnError(w, "incorrect exchange account id")
-		return
-	}
-
 	// Create db record.
-	timeframe, _ := strconv.Atoi(dto.Timeframe)
-	startDate, _ := time.Parse("2006-01-02", dto.StartDate)
-	endDate, _ := time.Parse("2006-01-02", dto.EndDate)
-	strat, err := h.strategyService.GetByUUID(context.TODO(), dto.StrategyID)
-	backtester := backtester.Backtester{
-		Strategy:  *strat,
-		StartDate: startDate,
-		EndDate:   endDate,
-		Symbol:    dto.Symbol,
-		Timeframe: timeframe,
-		Status:    backtester.Created,
-	}
-	backtesterDB, err := h.backtesterService.Create(context.TODO(), backtester, dto.StrategyID, dto.ExchangeAccountID)
+	backtesterDB, err := h.backtesterService.Create(context.TODO(), dto, user.ID)
 	if err != nil {
 		logger.Error(err.Error())
-		api.ReturnError(w, "")
+		handlers.ReturnError(w, http.StatusInternalServerError, "")
 		return
 	}
 
 	// Execute.
-
 	err = h.backtesterService.Run(context.TODO(), backtesterDB)
 	if err != nil {
 		logger.Error(err.Error())
-		api.ReturnError(w, err.Error())
+		handlers.ReturnError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
