@@ -13,8 +13,8 @@ func NewStorage() strategy.Storage {
 	return storage{}
 }
 
-func (s storage) SaveStrategy(implementation *string, userID, strategyID string) error {
-	dirpath, _ := utils.CreateDir([]string{"repository", "strategies", userID, strategyID})
+func (s storage) SaveStrategy(implementation *string, strategyID string) error {
+	dirpath, _ := utils.CreateDir([]string{"repository", "strategies", strategyID})
 	f, err := os.Create(filepath.Join(dirpath, "strategy"))
 	defer f.Close()
 	if err != nil {

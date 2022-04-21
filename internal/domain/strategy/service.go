@@ -2,12 +2,11 @@ package strategy
 
 import (
 	"context"
-	"stregy/internal/domain/user"
 )
 
 type Service interface {
 	GetByUUID(ctx context.Context, id string) (*Strategy, error)
-	Create(ctx context.Context, dto CreateStrategyDTO, user *user.User) (*Strategy, error)
+	Create(ctx context.Context, dto CreateStrategyDTO) (*Strategy, error)
 }
 
 type service struct {
@@ -19,13 +18,13 @@ func NewService(repository Repository, storage Storage) Service {
 	return &service{repository: repository, storage: storage}
 }
 
-func (s *service) Create(ctx context.Context, dto CreateStrategyDTO, user *user.User) (*Strategy, error) {
+func (s *service) Create(ctx context.Context, dto CreateStrategyDTO) (*Strategy, error) {
 	strategy := &Strategy{Name: dto.Name, Description: dto.Description}
 	strategy, err := s.repository.Create(ctx, *strategy)
 	if err != nil {
 		return nil, err
 	}
-	s.storage.SaveStrategy(dto.Implementation, user.ID, strategy.ID)
+	s.storage.SaveStrategy(dto.Implementation, strategy.ID)
 	return strategy, nil
 }
 

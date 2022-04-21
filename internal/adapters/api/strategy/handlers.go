@@ -60,7 +60,7 @@ func (h *handler) CreateStrategy(w http.ResponseWriter, r *http.Request, params 
 	user := user.User{}
 	mapstructure.Decode(args["user"], &user)
 
-	strat, err := h.strategyService.Create(context.TODO(), dto, &user)
+	strat, err := h.strategyService.Create(context.TODO(), dto)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		logger.Error(err.Error())

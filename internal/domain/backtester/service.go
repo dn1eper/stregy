@@ -49,7 +49,7 @@ func (s *service) Create(ctx context.Context, dto BacktesterDTO, userID string) 
 		Timeframe: dto.Timeframe,
 		Status:    Created,
 	}
-	return s.repository.CreateBacktester(ctx, bt)
+	return s.repository.Create(ctx, bt)
 }
 
 func (s *service) Run(ctx context.Context, b *Backtester) (err error) {
