@@ -15,6 +15,7 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/mitchellh/mapstructure"
+	"github.com/tjarratt/babble"
 )
 
 const (
@@ -51,6 +52,12 @@ func (h *handler) CreateStrategy(w http.ResponseWriter, r *http.Request, params 
 		w.WriteHeader(http.StatusInternalServerError)
 		logger.Error(err.Error())
 	}
+	if dto.Name == "" {
+		babbler := babble.NewBabbler()
+		dto.Name = babbler.Babble()
+		fmt.Println(dto.Name)
+	}
+
 	dto.Implementation = &(r.PostForm["file"][0])
 	if len(*dto.Implementation) == 0 {
 		logger.Error(err.Error())

@@ -80,5 +80,5 @@ func (h *handler) ExecuteBacktestHandler(
 		return
 	}
 
-	handlers.JsonResponseWriter(w, map[string]string{"strategy_execution_id": backtesterDB.ID})
+	handlers.JsonResponseWriter(w, map[string]string{"backtest_id": backtesterDB.ID})
 }
