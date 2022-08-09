@@ -7,7 +7,8 @@ import (
 )
 
 type Service interface {
-	Get(ctx context.Context, symbol string, start, end time.Time, timeframeSec int) chan Quote
+	Get(ctx context.Context, symbol string, start, end time.Time, timeframe int) chan Quote
+	Load(symbol, filePath, delimiter string) error
 }
 
 type service struct {
@@ -18,14 +19,14 @@ func NewService(repository Repository) Service {
 	return &service{repository: repository}
 }
 
-func (s *service) Get(ctx context.Context, symbol string, start, end time.Time, timeframeSec int) chan Quote {
-	ch := make(chan Quote, 10000)
-	go quoteGenerator(ctx, ch, s, symbol, start, end, timeframeSec)
-
+func (s *service) Get(ctx context.Context, symbol string, start, end time.Time, timeframe int) chan Quote {
+	ch := make(chan Quote, 256)
+	go quoteGenerator(ctx, ch, s, symbol, start, end, timeframe)
 	return ch
 }
 
-func quoteGenerator(ctx context.Context, ch chan<- Quote, s *service, symbol string, start, end time.Time, timeframeSec int) {
+func quoteGenerator(ctx context.Context, ch chan<- Quote, s *service, symbol string, start, end time.Time, timeframe int) {
+	timeframeSec := timeframe * 60
 	batchStart := start
 	batchEnd := batchStart.AddDate(0, 0, 1)
 	if batchEnd.After(end) {
@@ -57,4 +58,8 @@ func quoteGenerator(ctx context.Context, ch chan<- Quote, s *service, symbol str
 		}
 	}
 	close(ch)
+}
+
+func (s *service) Load(symbol, filePath, delimiter string) error {
+	return s.repository.Load(symbol, filePath, delimiter)
 }

@@ -7,9 +7,10 @@ import (
 )
 
 type Quote struct {
-	Time  time.Time
-	Open  decimal.Decimal
-	High  decimal.Decimal
-	Low   decimal.Decimal
-	Close decimal.Decimal
+	Time   time.Time
+	Open   decimal.Decimal
+	High   decimal.Decimal
+	Low    decimal.Decimal
+	Close  decimal.Decimal
+	Volume float32
 }
