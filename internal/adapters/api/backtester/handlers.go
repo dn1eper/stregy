@@ -56,29 +56,35 @@ func (h *handler) ExecuteBacktestHandler(
 	mapstructure.Decode(args["json"], &apiDTO)
 
 	// Create db record.
-	startDate, _ := time.Parse("2006-01-02", apiDTO.StartDate)
-	endDate, _ := time.Parse("2006-01-02", apiDTO.EndDate)
+	startDate, _ := time.Parse("2006-01-02 15:04:05", apiDTO.StartDate)
+	endDate, _ := time.Parse("2006-01-02 15:04:05", apiDTO.EndDate)
 	domainDTO := backtester.BacktesterDTO{
-		StrategyID: apiDTO.StrategyID,
-		Timeframe:  apiDTO.Timeframe,
-		Symbol:     apiDTO.Symbol,
-		StartDate:  startDate,
-		EndDate:    endDate,
+		StrategyID:          apiDTO.StrategyID,
+		Timeframe:           apiDTO.Timeframe,
+		Symbol:              apiDTO.Symbol,
+		StartDate:           startDate,
+		EndDate:             endDate,
+		HighOrderResolution: apiDTO.HighOrderResolution,
+		BarsNeeded:          apiDTO.BarsNeeded,
+		ATRperiod:           apiDTO.ATRperiod,
 	}
-	backtesterDB, err := h.backtesterService.Create(context.TODO(), domainDTO, user.ID)
+	btDomain, err := h.backtesterService.Create(context.TODO(), domainDTO)
 	if err != nil {
 		logger.Error(err.Error())
 		handlers.ReturnError(w, http.StatusInternalServerError, "")
 		return
 	}
+	// set fields not saved to db
+	btDomain.BarsNeeded = apiDTO.BarsNeeded
+	btDomain.ATRperiod = apiDTO.ATRperiod
 
 	// Execute.
-	err = h.backtesterService.Run(context.TODO(), backtesterDB)
+	err = h.backtesterService.Run(context.TODO(), btDomain)
 	if err != nil {
 		logger.Error(err.Error())
 		handlers.ReturnError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	handlers.JsonResponseWriter(w, map[string]string{"backtest_id": backtesterDB.ID})
+	handlers.JsonResponseWriter(w, map[string]string{"backtest_id": btDomain.ID})
 }

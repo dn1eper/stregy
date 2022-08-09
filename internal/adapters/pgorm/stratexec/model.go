@@ -30,5 +30,6 @@ type StrategyExecution struct {
 	Symbol              string                  `gorm:"not null"`
 	StartTime           time.Time               `gorm:"type:timestamp;not null"`
 	EndTime             time.Time               `gorm:"type:timestamp"`
+	HighOrderResolution bool                    `gorm:"type:bool"`
 	Status              StrategyExecutionStatus `gorm:"type:strategy_execution_status;not null"`
 }

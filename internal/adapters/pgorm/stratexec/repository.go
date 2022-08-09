@@ -20,12 +20,13 @@ func (r *repository) Create(ctx context.Context, bt backtester.Backtester) (*bac
 	strategyIDParsed, _ := uuid.Parse(bt.Strategy.ID)
 
 	se := &StrategyExecution{
-		StrategyID: strategyIDParsed,
-		Timeframe:  bt.Timeframe,
-		Symbol:     bt.Symbol,
-		StartTime:  bt.StartDate,
-		EndTime:    bt.EndDate,
-		Status:     StrategyExecutionStatus(bt.Status),
+		StrategyID:          strategyIDParsed,
+		Timeframe:           bt.Timeframe,
+		Symbol:              bt.Symbol,
+		StartTime:           bt.StartDate,
+		EndTime:             bt.EndDate,
+		HighOrderResolution: bt.HighOrderResolution,
+		Status:              StrategyExecutionStatus(bt.Status),
 	}
 	result := r.db.Create(se)
 	if result.Error != nil {
