@@ -17,72 +17,80 @@ import (
 func Run(cfg *config.Config) {
 	logger := logging.GetLogger()
 
-	logger.Info("router initializing")
+	logger.Info("router initialization")
 	router := httprouter.New()
 
-	logger.Info("pgorm composite initializing")
+	logger.Info("pgorm composite initialization")
 	pgormComposite, err := composites.NewPGormComposite(context.Background(), cfg.PosgreSQL.Host, cfg.PosgreSQL.Port, cfg.PosgreSQL.Username, cfg.PosgreSQL.Password, cfg.PosgreSQL.Database)
 	if err != nil {
-		logger.Fatal("mongodb composite failed")
+		logger.Fatal("pgorm composite failed")
 	}
 
-	logger.Info("user composite initializing")
+	logger.Info("user composite initialization")
 	userComposite, err := composites.NewUserComposite(pgormComposite)
 	if err != nil {
 		logger.Fatal("user composite failed")
 	}
 	userComposite.Handler.Register(router)
 
-	logger.Info("quote composite initializing")
+	logger.Info("quote composite initialization")
 	quoteComposite, err := composites.NewQuoteComposite(pgormComposite)
 	if err != nil {
 		logger.Fatal("quote composite failed")
 	}
 
-	logger.Info("strategy composite initializing")
+	logger.Info("tick composite initialization")
+	tickComposite, err := composites.NewTickComposite(pgormComposite)
+	if err != nil {
+		logger.Fatal("tick composite failed")
+	}
+	// tickComposite.Service.Load(context.TODO(), )
+
+	logger.Info("strategy composite initialization")
 	strategyComposite, err := composites.NewStrategyComposite(pgormComposite, userComposite.Service)
 	if err != nil {
 		logger.Fatal("strategy composite failed")
 	}
 	strategyComposite.Handler.Register(router)
 
-	logger.Info("exchange account composite initializing")
+	logger.Info("exchange account composite initialization")
 	exgAccountComposite, err := composites.NewExchangeAccountComposite(pgormComposite, userComposite.Service)
 	if err != nil {
 		logger.Fatal("exchange account composite failed")
 	}
 	exgAccountComposite.Handler.Register(router)
 
-	logger.Info("symbol composite initializing")
+	logger.Info("symbol composite initialization")
 	_, err = composites.NewSymbolComposite(pgormComposite)
 	if err != nil {
 		logger.Fatal("symbol composite failed")
 	}
 
-	logger.Info("order composite initializing")
+	logger.Info("order composite initialization")
 	orderComposite, err := composites.NewOrderComposite()
 	if err != nil {
 		logger.Fatal("order composite failed")
 	}
 
-	logger.Info("position composite initializing")
+	logger.Info("position composite initialization")
 	positionComposite, err := composites.NewPositionComposite(pgormComposite, orderComposite.Service)
 	if err != nil {
 		logger.Fatal("position composite failed")
 	}
 
-	logger.Info("backtester composite initializing")
+	logger.Info("backtester composite initialization")
 	backtesterComposite, err := composites.NewBacktesterComposite(
 		pgormComposite, exgAccountComposite.Service,
 		strategyComposite.Service, userComposite.Service,
-		quoteComposite.Service, positionComposite.Service,
+		tickComposite.Service, quoteComposite.Service,
+		positionComposite.Service,
 	)
 	if err != nil {
 		logger.Fatal("backtester composite failed")
 	}
 	backtesterComposite.Handler.Register(router)
 
-	logger.Info("listener initializing")
+	logger.Info("listener initialization")
 	listener, err := net.Listen("tcp", fmt.Sprintf("%v:%v", cfg.Listen.BindIP, cfg.Listen.Port))
 	if err != nil {
 		panic(err)
