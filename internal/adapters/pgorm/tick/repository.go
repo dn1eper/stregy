@@ -41,7 +41,7 @@ func (r repository) Load(symbol, filePath, delimiter string) error {
 	return r.db.Exec(fmt.Sprintf(`
 	CREATE UNLOGGED TABLE IF NOT EXISTS temp_ticks (
 		time double precision,
-		price decimal(20, 8)
+		price double precision
 	 );
 	 
 	COPY temp_ticks FROM '%v' DELIMITERS '%v' CSV;
@@ -50,7 +50,10 @@ func (r repository) Load(symbol, filePath, delimiter string) error {
 	ALTER time TYPE timestamp without time zone
 		USING (to_timestamp(time) AT TIME ZONE 'UTC');
 	 
-	CREATE TABLE %v (LIKE temp_quotes INCLUDING ALL);
+	CREATE TABLE IF NOT EXISTS %v (
+		time timestamp PRIMARY KEY,
+		price double precision
+	);
 
 	INSERT INTO %v SELECT * FROM temp_ticks ON CONFLICT DO NOTHING;
 

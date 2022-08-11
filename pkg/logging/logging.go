@@ -35,31 +35,16 @@ func (hook *writerHook) Levels() []logrus.Level {
 	return hook.LogLevels
 }
 
-var e *logrus.Entry
-
-type Logger struct {
-	*logrus.Entry
-}
-
-func GetLogger() Logger {
-	return Logger{e}
-}
-
-func (l *Logger) GetLoggerWithField(k string, v interface{}) Logger {
-	return Logger{l.WithField(k, v)}
-}
-
-func Init() {
-	l := logrus.New()
-	l.SetReportCaller(true)
-	l.Formatter = &logrus.TextFormatter{
+func Init(level string) {
+	logrus.SetReportCaller(true)
+	logrus.SetFormatter(&logrus.TextFormatter{
 		CallerPrettyfier: func(f *runtime.Frame) (string, string) {
 			filename := path.Base(f.File)
 			return fmt.Sprintf("%s:%d", filename, f.Line), fmt.Sprintf("%s()", f.Function)
 		},
 		DisableColors: false,
 		FullTimestamp: true,
-	}
+	})
 
 	err := os.MkdirAll("logs", 0755)
 
@@ -71,15 +56,17 @@ func Init() {
 			panic(fmt.Sprintf("[Error]: %s", err))
 		}
 
-		l.SetOutput(ioutil.Discard) // Send all logs to nowhere by default
+		logrus.SetOutput(ioutil.Discard) // Send all logs to nowhere by default
 
-		l.AddHook(&writerHook{
+		logrus.AddHook(&writerHook{
 			Writer:    []io.Writer{allFile, os.Stdout},
 			LogLevels: logrus.AllLevels,
 		})
 	}
 
-	l.SetLevel(logrus.TraceLevel)
-
-	e = logrus.NewEntry(l)
+	logrusLevel, err := logrus.ParseLevel(level)
+	if err != nil {
+		panic(err)
+	}
+	logrus.SetLevel(logrusLevel)
 }

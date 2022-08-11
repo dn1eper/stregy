@@ -1,6 +1,7 @@
 ---
 
 is_debug: true
+log_level: warning
 listen:
   type: port
   port: 1234

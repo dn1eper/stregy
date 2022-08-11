@@ -7,7 +7,8 @@ import (
 	userapi "stregy/internal/adapters/api/user"
 	"stregy/internal/domain/user"
 	"stregy/pkg/handlers"
-	"stregy/pkg/logging"
+
+	log "github.com/sirupsen/logrus"
 
 	exgaccount1 "stregy/internal/domain/exgaccount"
 
@@ -44,8 +45,7 @@ func (h *handler) CreateExchangeAccount(w http.ResponseWriter, r *http.Request, 
 
 	exchangeAccount, err := h.exgAccountService.Create(context.TODO(), dto, &user)
 	if err != nil {
-		logger := logging.GetLogger()
-		logger.Error(err.Error())
+		log.Error(err.Error())
 		handlers.ReturnError(w, http.StatusInternalServerError, "")
 		return
 	}
@@ -56,8 +56,7 @@ func (h *handler) CreateExchangeAccount(w http.ResponseWriter, r *http.Request, 
 func (h *handler) GetExchangeAccount(w http.ResponseWriter, r *http.Request, params httprouter.Params, args map[string]interface{}) {
 	exchangeAccount, err := h.exgAccountService.GetOne(context.TODO(), r.URL.Query().Get("id"))
 	if err != nil {
-		logger := logging.GetLogger()
-		logger.Error(err.Error())
+		log.Error(err.Error())
 		handlers.ReturnError(w, http.StatusInternalServerError, "")
 		return
 	}

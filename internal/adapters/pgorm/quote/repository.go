@@ -42,23 +42,30 @@ func (r repository) Load(symbol, filePath, delimiter string) error {
 	return r.db.Exec(fmt.Sprintf(`
 	CREATE UNLOGGED TABLE IF NOT EXISTS temp_quotes (
 		time double precision,
-		open decimal(20, 8),
-		high decimal(20, 8),
-		low decimal(20, 8),
-		close decimal(20, 8),
+		open double precision,
+		high double precision,
+		low double precision,
+		close double precision,
 		volume real
 	 );
 	 
 	COPY temp_quotes FROM '%v' DELIMITERS '%v' CSV;
-	
+
 	ALTER TABLE temp_quotes
 	ALTER time TYPE timestamp without time zone
 		USING (to_timestamp(time) AT TIME ZONE 'UTC');
-	
-	CREATE TABLE %v (LIKE temp_quotes INCLUDING ALL);
+
+	CREATE TABLE IF NOT EXISTS %v (
+		time timestamp PRIMARY KEY,
+		open double precision,
+		high double precision,
+		low double precision,
+		close double precision,
+		volume real
+	);
 
 	INSERT INTO %v SELECT * FROM temp_quotes ON CONFLICT DO NOTHING;
-	 
+
 	DROP TABLE temp_quotes;`,
 		filePath, delimiter, tableName, tableName)).Error
 }

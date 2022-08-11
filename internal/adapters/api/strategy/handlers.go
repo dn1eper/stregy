@@ -9,7 +9,8 @@ import (
 	user1 "stregy/internal/adapters/api/user"
 	"stregy/internal/domain/user"
 	"stregy/pkg/handlers"
-	"stregy/pkg/logging"
+
+	log "github.com/sirupsen/logrus"
 
 	strategy1 "stregy/internal/domain/strategy"
 
@@ -39,8 +40,6 @@ func (h *handler) Register(router *httprouter.Router) {
 }
 
 func (h *handler) CreateStrategy(w http.ResponseWriter, r *http.Request, params httprouter.Params, args map[string]interface{}) {
-	logger := logging.GetLogger()
-
 	err := r.ParseMultipartForm(2000000000)
 	if err != nil {
 		fmt.Printf("Error parsing form: %v\n", err)
@@ -50,7 +49,7 @@ func (h *handler) CreateStrategy(w http.ResponseWriter, r *http.Request, params 
 	err = json.Unmarshal([]byte(r.Form["json"][0]), &dto)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		logger.Error(err.Error())
+		log.Error(err.Error())
 	}
 	if dto.Name == "" {
 		babbler := babble.NewBabbler()
@@ -60,7 +59,7 @@ func (h *handler) CreateStrategy(w http.ResponseWriter, r *http.Request, params 
 
 	dto.Implementation = &(r.PostForm["file"][0])
 	if len(*dto.Implementation) == 0 {
-		logger.Error(err.Error())
+		log.Error(err.Error())
 		handlers.ReturnError(w, http.StatusBadRequest, "implementation is empty")
 	}
 
@@ -70,7 +69,7 @@ func (h *handler) CreateStrategy(w http.ResponseWriter, r *http.Request, params 
 	strat, err := h.strategyService.Create(context.TODO(), dto)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		logger.Error(err.Error())
+		log.Error(err.Error())
 	}
 
 	handlers.JsonResponseWriter(w, map[string]string{"strategy_id": strat.ID})

@@ -8,14 +8,11 @@ import (
 
 func Aggregate(ctx context.Context, quotes []Quote, timeframeSec int) ([]Quote, error) {
 	quoteTime := quotes[0].Time
-	if quoteTime.UnixNano()%1000000 != 0 {
-		return nil, errors.New("quotes are not alligned to miliseconds")
+	inputTimeframeMsc := quotes[1].Time.Sub(quotes[0].Time).Milliseconds()
+	if inputTimeframeMsc > int64(timeframeSec)*1000 {
+		return nil, errors.New("base timeframe is bigger than one you asked to aggregate to")
 	}
-	inputTimeframeMSC := quotes[1].Time.Sub(quotes[0].Time).Milliseconds()
-	if inputTimeframeMSC > int64(timeframeSec)*1000 {
-		return nil, errors.New("base timeframe is bigger than required")
-	}
-	if inputTimeframeMSC == int64(timeframeSec)*1000 {
+	if inputTimeframeMsc == int64(timeframeSec)*1000 {
 		return quotes, nil
 	}
 
@@ -29,10 +26,10 @@ func Aggregate(ctx context.Context, quotes []Quote, timeframeSec int) ([]Quote, 
 
 	for idx, quote := range quotes {
 		if quote.Time.Before(nextQuoteTime) && idx != len(quotes)-1 {
-			if high.LessThan(quote.High) {
+			if high < quote.High {
 				high = quote.High
 			}
-			if quote.Low.LessThan(low) {
+			if quote.Low < low {
 				low = quote.Low
 			}
 		} else {

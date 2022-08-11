@@ -4,15 +4,15 @@ import (
 	"stregy/internal/app"
 	"stregy/internal/config"
 	"stregy/pkg/logging"
+
+	log "github.com/sirupsen/logrus"
 )
 
 func main() {
 	// entry point
-	logging.Init()
-	logger := logging.GetLogger()
-
-	logger.Info("config initializing")
+	log.Info("config initializing")
 	cfg := config.GetConfig()
+	logging.Init(cfg.LogLevel)
 
 	app.Run(cfg)
 }

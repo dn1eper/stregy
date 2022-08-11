@@ -5,7 +5,8 @@ import (
 	"net/http"
 	"stregy/internal/adapters/api"
 	"stregy/pkg/handlers"
-	"stregy/pkg/logging"
+
+	log "github.com/sirupsen/logrus"
 
 	"stregy/internal/domain/user"
 
@@ -35,15 +36,13 @@ func (h *handler) Register(router *httprouter.Router) {
 
 }
 func (h *handler) CreateUser(w http.ResponseWriter, r *http.Request, params httprouter.Params, args map[string]interface{}) {
-	logger := logging.GetLogger()
-
 	dto := user.CreateUserDTO{}
 	mapstructure.Decode(args["json"], &dto)
 
 	user, err := h.userService.Create(context.TODO(), &dto)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		logger.Error(err.Error())
+		log.Error(err.Error())
 		return
 	}
 

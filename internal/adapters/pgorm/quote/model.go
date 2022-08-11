@@ -3,17 +3,15 @@ package quote
 import (
 	"stregy/internal/domain/quote"
 	"time"
-
-	"github.com/shopspring/decimal"
 )
 
 type Quote struct {
-	Time   time.Time       `gorm:"primaryKey;type:timestamp;index:time_idx_quotes"`
-	Open   decimal.Decimal `gorm:"type:decimal(20,8)"`
-	High   decimal.Decimal `gorm:"type:decimal(20,8)"`
-	Low    decimal.Decimal `gorm:"type:decimal(20,8)"`
-	Close  decimal.Decimal `gorm:"type:decimal(20,8)"`
-	Volume float32         `gorm:"type:real"`
+	Time   time.Time `gorm:"primaryKey;type:timestamp;index:time_idx_quotes"`
+	Open   float64   `gorm:"type:double precision"`
+	High   float64   `gorm:"type:double precision"`
+	Low    float64   `gorm:"type:double precision"`
+	Close  float64   `gorm:"type:double precision"`
+	Volume float64   `gorm:"type:double precision"`
 }
 
 func (q *Quote) ToDomain() quote.Quote {

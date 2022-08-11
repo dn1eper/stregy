@@ -9,8 +9,9 @@ import (
 	"stregy/internal/domain/exgaccount"
 	"stregy/internal/domain/user"
 	"stregy/pkg/handlers"
-	"stregy/pkg/logging"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/mitchellh/mapstructure"
@@ -48,7 +49,6 @@ func (h *handler) ExecuteBacktestHandler(
 	params httprouter.Params,
 	args map[string]interface{},
 ) {
-	logger := logging.GetLogger()
 	// Parse and validate request.
 	user := user.User{}
 	mapstructure.Decode(args["user"], &user)
@@ -70,7 +70,7 @@ func (h *handler) ExecuteBacktestHandler(
 	}
 	btDomain, err := h.backtesterService.Create(context.TODO(), domainDTO)
 	if err != nil {
-		logger.Error(err.Error())
+		log.Error(err.Error())
 		handlers.ReturnError(w, http.StatusInternalServerError, "")
 		return
 	}
@@ -81,7 +81,7 @@ func (h *handler) ExecuteBacktestHandler(
 	// Execute.
 	err = h.backtesterService.Run(context.TODO(), btDomain)
 	if err != nil {
-		logger.Error(err.Error())
+		log.Error(err.Error())
 		handlers.ReturnError(w, http.StatusInternalServerError, err.Error())
 		return
 	}

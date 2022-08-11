@@ -1,15 +1,17 @@
 package config
 
 import (
-	"stregy/pkg/logging"
 	"sync"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/ilyakaznacheev/cleanenv"
 )
 
 type Config struct {
-	IsDebug *bool `yaml:"is_debug" env-required:"true"`
-	Listen  struct {
+	IsDebug  *bool  `yaml:"is_debug" env-required:"true"`
+	LogLevel string `yaml:"log_level" env-default:"error"`
+	Listen   struct {
 		Type   string `yaml:"type" env-default:"port"`
 		BindIP string `yaml:"bind_ip" env-default:"127.0.0.1"`
 		Port   string `yaml:"port" env-default:"8080"`
@@ -30,13 +32,12 @@ var once sync.Once
 
 func GetConfig() *Config {
 	once.Do(func() {
-		logger := logging.GetLogger()
-		logger.Info("read application configuration")
+		log.Info("read application configuration")
 		instance = &Config{}
 		if err := cleanenv.ReadConfig("config.yaml", instance); err != nil {
 			help, _ := cleanenv.GetDescription(instance, nil)
-			logger.Info(help)
-			logger.Fatal(err)
+			log.Info(help)
+			log.Fatal(err)
 		}
 	})
 	return instance
