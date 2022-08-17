@@ -3,23 +3,24 @@ package order
 import (
 	"database/sql/driver"
 	"stregy/internal/adapters/pgorm/stratexec"
+	"stregy/internal/domain/order"
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/shopspring/decimal"
 )
 
 type Order struct {
 	OrderID             uuid.UUID `gorm:"primaryKey;type:uuid;default:uuid_generate_v4()"`
 	StrategyExecution   stratexec.StrategyExecution
 	StrategyExecutionID uuid.UUID
-	Price               decimal.Decimal `gorm:"type:decimal;not null"`
-	Direction           OrderDirection  `gorm:"type:order_direction"`
-	Size                decimal.Decimal `gorm:"type:decimal;not null"`
-	Type                OrderType       `gorm:"type:order_type;not null"`
-	ExecutionTime       time.Time       `gorm:"type:timestamp"`
-	ExecutionPrice      decimal.Decimal `gorm:"type:decimal"`
-	Status              OrderStatus     `gorm:"type:order_status;not null"`
+	Price               float64        `gorm:"type:double precision;not null"`
+	Direction           OrderDirection `gorm:"type:order_direction"`
+	Size                float64        `gorm:"type:double precision;not null"`
+	Type                OrderType      `gorm:"type:order_type;not null"`
+	SetupTime           time.Time      `gorm:"type:timestamp;not null"`
+	DoneTime            time.Time      `gorm:"type:timestamp"`
+	FillPrice           float64        `gorm:"type:double precision"`
+	Status              OrderStatus    `gorm:"type:order_status;not null"`
 }
 
 type OrderType string
@@ -30,6 +31,7 @@ const (
 	StopLimit    OrderType = "StopLimitOrder"
 	StopMarket   OrderType = "StopMarketOrder"
 	TrailingStop OrderType = "TrailingStopOrder"
+	CloseBy      OrderType = "CloseByOrder"
 )
 
 func (ot *OrderType) Scan(value interface{}) error {
@@ -48,7 +50,7 @@ const (
 	Accepted  OrderStatus = "AcceptedOrder"
 	Rejected  OrderStatus = "RejectedOrder"
 	Partial   OrderStatus = "PartialOrder"
-	Completed OrderStatus = "CompletedOrder"
+	Filled    OrderStatus = "FilledOrder"
 	Cancelled OrderStatus = "CancelledOrder"
 	Expired   OrderStatus = "ExpiredOrder"
 	Margin    OrderStatus = "MarginOrder"
@@ -77,4 +79,18 @@ func (od *OrderDirection) Scan(value interface{}) error {
 
 func (od OrderDirection) Value() (driver.Value, error) {
 	return string(od), nil
+}
+
+func (o *Order) ToDomain() *order.Order {
+	return &order.Order{
+		OrderID:   o.OrderID.String(),
+		Direction: order.OrderDirection(o.Direction),
+		Price:     o.Price,
+		Size:      o.Size,
+		Type:      order.OrderType(o.Type),
+		SetupTime: o.SetupTime,
+		DoneTime:  o.DoneTime,
+		FillPrice: o.FillPrice,
+		Status:    order.OrderStatus(o.Status),
+	}
 }

@@ -21,7 +21,7 @@ func Run(cfg *config.Config) {
 	log.Info("pgorm composite initialization")
 	pgormComposite, err := composites.NewPGormComposite(context.Background(), cfg.PosgreSQL.Host, cfg.PosgreSQL.Port, cfg.PosgreSQL.Username, cfg.PosgreSQL.Password, cfg.PosgreSQL.Database)
 	if err != nil {
-		log.Fatal("pgorm composite failed")
+		log.Fatal("pgorm composite failed: ", err)
 	}
 
 	log.Info("user composite initialization")
@@ -65,7 +65,7 @@ func Run(cfg *config.Config) {
 	}
 
 	log.Info("order composite initialization")
-	orderComposite, err := composites.NewOrderComposite()
+	orderComposite, err := composites.NewOrderComposite(pgormComposite)
 	if err != nil {
 		log.Fatal("order composite failed")
 	}

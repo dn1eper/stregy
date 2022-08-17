@@ -7,16 +7,13 @@ import (
 )
 
 type PositionComposite struct {
-	Repository position.Repository
-	Service    position.Service
+	Service position.Service
 }
 
-func NewPositionComposite(composite *PGormComposite, orderService order.Service) (*PositionComposite, error) {
-	repository := position1.NewRepository(composite.db)
+func NewPositionComposite(repoComposite *PGormComposite, orderService order.Service) (*PositionComposite, error) {
+	repository := position1.NewRepository(repoComposite.db)
 	service := position.NewService(repository, orderService)
-
 	return &PositionComposite{
-		Repository: repository,
-		Service:    service,
+		Service: service,
 	}, nil
 }
