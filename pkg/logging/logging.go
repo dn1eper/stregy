@@ -35,7 +35,7 @@ func (hook *writerHook) Levels() []logrus.Level {
 	return hook.LogLevels
 }
 
-func Init(level string) {
+func Init(level string, logPath string) {
 	logrus.SetReportCaller(true)
 	logrus.SetFormatter(&logrus.TextFormatter{
 		CallerPrettyfier: func(f *runtime.Frame) (string, string) {
@@ -51,7 +51,7 @@ func Init(level string) {
 	if err != nil || os.IsExist(err) {
 		panic("can't create log dir. no configured logging to files")
 	} else {
-		allFile, err := os.OpenFile("logs/all.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0660)
+		allFile, err := os.OpenFile(logPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0660)
 		if err != nil {
 			panic(fmt.Sprintf("[Error]: %s", err))
 		}

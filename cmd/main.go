@@ -12,7 +12,7 @@ func main() {
 	// entry point
 	log.Info("config initializing")
 	cfg := config.GetConfig()
-	logging.Init(cfg.LogLevel)
+	logging.Init(cfg.LogLevel, "logs/all.log")
 
 	app.Run(cfg)
 }

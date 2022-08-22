@@ -3,6 +3,7 @@ package gostrategy
 import (
 	"context"
 	"fmt"
+	"os"
 	"os/exec"
 	"stregy/internal/domain/backtester"
 	"stregy/pkg/utils"
@@ -30,15 +31,18 @@ func (e *executor) Execute(ctx context.Context, b *backtester.Backtester) error 
 	}
 
 	// run
-	log.Info("starting backtest")
-	cmd := exec.Command("go", "run", stregyCopyPath+"/internal/domain/backtester/gostrategy/cmd/main.go", b.ID)
-	if err := cmd.Start(); err != nil {
-		log.Fatal(err)
+	logDirPath, _ := os.Getwd()
+	logDirPath, err = utils.CreateDir(logDirPath, "logs", "stratexec")
+	if err != nil {
+		log.Error(err)
 		return err
 	}
+	log.Info("starting backtest")
+	cmd := exec.Command("go", "run", stregyCopyPath+"/internal/domain/backtester/gostrategy/cmd/main.go", b.ID, logDirPath)
 	go func() {
-		if err := cmd.Wait(); err != nil {
-			log.Error(fmt.Sprintf("%v: %v", err, cmd.Stdout))
+		output, err := cmd.Output()
+		if err != nil {
+			log.Error(fmt.Sprintf("%v: %v", err, output))
 		}
 	}()
 
