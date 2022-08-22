@@ -16,7 +16,7 @@ func NewRepository(client *gorm.DB) *repository {
 	return &repository{db: client}
 }
 
-func (r *repository) Create(ctx context.Context, bt backtester.Backtester) (*backtester.Backtester, error) {
+func (r *repository) CreateBacktest(ctx context.Context, bt backtester.Backtester) (*backtester.Backtester, error) {
 	strategyIDParsed, _ := uuid.Parse(bt.Strategy.ID)
 
 	se := &StrategyExecution{
@@ -34,5 +34,25 @@ func (r *repository) Create(ctx context.Context, bt backtester.Backtester) (*bac
 	}
 
 	bt.ID = se.StrategyExecutionID.String()
+	return &bt, nil
+}
+
+func (r *repository) GetBacktest(id string) (*backtester.Backtester, error) {
+	se := &StrategyExecution{}
+	result := r.db.First(se, id)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	bt := backtester.Backtester{
+		ID:                  se.StrategyExecutionID.String(),
+		Strategy:            *se.Strategy.ToDomain(),
+		StartDate:           se.StartTime,
+		EndDate:             se.EndTime,
+		Symbol:              se.Symbol,
+		Timeframe:           se.Timeframe,
+		Status:              backtester.StrategyExecutionStatus(se.Status),
+		HighOrderResolution: se.HighOrderResolution,
+	}
 	return &bt, nil
 }

@@ -7,7 +7,7 @@ import (
 )
 
 type Service interface {
-	Get(ctx context.Context, symbol string, start, end time.Time, timeframe int) chan Quote
+	Get(ctx context.Context, symbol string, start, end time.Time, timeframe int) <-chan Quote
 	Load(symbol, filePath, delimiter string) error
 }
 
@@ -19,7 +19,7 @@ func NewService(repository Repository) Service {
 	return &service{repository: repository}
 }
 
-func (s *service) Get(ctx context.Context, symbol string, start, end time.Time, timeframe int) chan Quote {
+func (s *service) Get(ctx context.Context, symbol string, start, end time.Time, timeframe int) <-chan Quote {
 	ch := make(chan Quote, 256)
 	go quoteGenerator(ctx, ch, s, symbol, start, end, timeframe)
 	return ch

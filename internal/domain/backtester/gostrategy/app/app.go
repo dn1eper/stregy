@@ -2,23 +2,15 @@ package app
 
 import (
 	"context"
-	"fmt"
-	"net"
-	"net/http"
+	"os"
 	"stregy/internal/composites"
 	"stregy/internal/config"
 	"stregy/internal/domain/backtester/gostrategy"
-	"time"
 
 	log "github.com/sirupsen/logrus"
-
-	"github.com/julienschmidt/httprouter"
 )
 
 func Run(cfg *config.Config) {
-	log.Info("router initialization")
-	router := httprouter.New()
-
 	log.Info("pgorm composite initialization")
 	pgormComposite, err := composites.NewPGormComposite(context.Background(), cfg.PosgreSQL.Host, cfg.PosgreSQL.Port, cfg.PosgreSQL.Username, cfg.PosgreSQL.Password, cfg.PosgreSQL.Database)
 	if err != nil {
@@ -30,7 +22,6 @@ func Run(cfg *config.Config) {
 	if err != nil {
 		log.Fatal("user composite failed")
 	}
-	userComposite.Handler.Register(router)
 
 	log.Info("quote composite initialization")
 	quoteComposite, err := composites.NewQuoteComposite(pgormComposite)
@@ -43,21 +34,18 @@ func Run(cfg *config.Config) {
 	if err != nil {
 		log.Fatal("tick composite failed")
 	}
-	// tickComposite.Service.Load(context.TODO(), )
 
 	log.Info("strategy composite initialization")
 	strategyComposite, err := composites.NewStrategyComposite(pgormComposite, userComposite.Service)
 	if err != nil {
 		log.Fatal("strategy composite failed")
 	}
-	strategyComposite.Handler.Register(router)
 
 	log.Info("exchange account composite initialization")
 	exgAccountComposite, err := composites.NewExchangeAccountComposite(pgormComposite, userComposite.Service)
 	if err != nil {
 		log.Fatal("exchange account composite failed")
 	}
-	exgAccountComposite.Handler.Register(router)
 
 	log.Info("symbol composite initialization")
 	_, err = composites.NewSymbolComposite(pgormComposite)
@@ -89,18 +77,17 @@ func Run(cfg *config.Config) {
 	if err != nil {
 		log.Fatal("backtester composite failed")
 	}
-	backtesterComposite.Handler.Register(router)
 
-	log.Info("listener initialization")
-	listener, err := net.Listen("tcp", fmt.Sprintf("%v:%v", cfg.Listen.BindIP, cfg.Listen.Port))
+	// execute
+	if len(os.Args) < 2 {
+		log.Error("no backtester id provided")
+		return
+	}
+	backtesterID := os.Args[1]
+	bt, err := backtesterComposite.Service.Get(backtesterID)
+	err = backtesterComposite.Service.Run(context.Background(), bt)
 	if err != nil {
-		panic(err)
+		log.Error(err)
+		return
 	}
-
-	server := &http.Server{
-		Handler:      router,
-		WriteTimeout: 15 * time.Second,
-		ReadTimeout:  15 * time.Second,
-	}
-	log.Fatalln(server.Serve(listener))
 }

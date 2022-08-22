@@ -14,8 +14,11 @@ func NewStorage() strategy.Storage {
 }
 
 func (s storage) SaveStrategy(implementation *string, strategyID string) error {
-	dirpath, _ := utils.CreateDir([]string{"repository", "strategies", strategyID})
-	f, err := os.Create(filepath.Join(dirpath, "strategy"))
+	dirpath, _ := utils.CreateDir("repository", "strategies", strategyID)
+	f, err := os.Create(filepath.Join(dirpath, "strategy.zip"))
+	if err != nil {
+		return err
+	}
 	defer f.Close()
 	if err != nil {
 		return err

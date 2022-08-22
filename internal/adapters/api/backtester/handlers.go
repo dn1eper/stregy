@@ -74,12 +74,9 @@ func (h *handler) ExecuteBacktestHandler(
 		handlers.ReturnError(w, http.StatusInternalServerError, "")
 		return
 	}
-	// set fields not saved to db
-	btDomain.BarsNeeded = apiDTO.BarsNeeded
-	btDomain.ATRperiod = apiDTO.ATRperiod
 
-	// Execute.
-	err = h.backtesterService.Run(context.TODO(), btDomain)
+	// execute
+	err = h.backtesterService.Start(context.TODO(), btDomain)
 	if err != nil {
 		log.Error(err.Error())
 		handlers.ReturnError(w, http.StatusInternalServerError, err.Error())

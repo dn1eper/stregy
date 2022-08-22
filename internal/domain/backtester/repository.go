@@ -5,5 +5,6 @@ import (
 )
 
 type Repository interface {
-	Create(ctx context.Context, backtester Backtester) (*Backtester, error)
+	CreateBacktest(ctx context.Context, backtester Backtester) (*Backtester, error)
+	GetBacktest(id string) (*Backtester, error)
 }
