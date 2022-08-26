@@ -14,9 +14,8 @@ func main() {
 	// entry point
 	log.Info("config initializing")
 	cfg := config.GetConfig()
-	stratexecID := os.Args[1]
 	logDirPath := os.Args[2]
-	logging.Init(cfg.LogLevel, fmt.Sprintf("%v/%v.log", logDirPath, stratexecID))
+	logging.Init(cfg.LogLevel, fmt.Sprintf("%v/all.log", logDirPath), false)
 
 	app.Run(cfg)
 }

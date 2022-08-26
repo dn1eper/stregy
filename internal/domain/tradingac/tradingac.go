@@ -1,4 +1,4 @@
-package account
+package tradingac
 
 import (
 	"stregy/internal/domain/order"
@@ -8,6 +8,13 @@ import (
 type Account struct {
 	activeOrders    map[string]order.Order
 	activePositions map[string]position.Position
+}
+
+func NewAccount() *Account {
+	return &Account{
+		activeOrders:    make(map[string]order.Order),
+		activePositions: make(map[string]position.Position),
+	}
 }
 
 func (a *Account) RegisterOrder(o *order.Order) {

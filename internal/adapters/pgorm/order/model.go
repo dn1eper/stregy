@@ -26,12 +26,14 @@ type Order struct {
 type OrderType string
 
 const (
-	Limit        OrderType = "LimitOrder"
-	Market       OrderType = "MarketOrder"
-	StopLimit    OrderType = "StopLimitOrder"
-	StopMarket   OrderType = "StopMarketOrder"
-	TrailingStop OrderType = "TrailingStopOrder"
-	CloseBy      OrderType = "CloseByOrder"
+	Limit         OrderType = "LimitOrder"
+	Stop          OrderType = "StopOrder"
+	Market        OrderType = "MarketOrder"
+	StopLimit     OrderType = "StopLimitOrder"
+	TrailingStop  OrderType = "TrailingStopOrder"
+	CloseByLimit  OrderType = "CloseByLimitOrder"
+	CloseByStop   OrderType = "CloseByStopOrder"
+	CloseByMarket OrderType = "CloseByMarketOrder"
 )
 
 func (ot *OrderType) Scan(value interface{}) error {

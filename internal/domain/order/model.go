@@ -5,15 +5,16 @@ import (
 )
 
 type Order struct {
-	OrderID   string
-	Direction OrderDirection
-	Size      float64
-	Price     float64
-	Status    OrderStatus
-	Type      OrderType
-	SetupTime time.Time
-	DoneTime  time.Time
-	FillPrice float64
+	OrderID    string
+	Direction  OrderDirection
+	Size       float64
+	Price      float64
+	Status     OrderStatus
+	Type       OrderType
+	SetupTime  time.Time
+	DoneTime   time.Time
+	FillPrice  float64
+	PositionID string
 }
 
 type OrderStatus string
@@ -33,12 +34,14 @@ const (
 type OrderType string
 
 const (
-	Limit        OrderType = "LimitOrder"
-	Market       OrderType = "MarketOrder"
-	StopLimit    OrderType = "StopLimitOrder"
-	StopMarket   OrderType = "StopMarketOrder"
-	TrailingStop OrderType = "TrailingStopOrder"
-	CloseBy      OrderType = "CloseByOrder"
+	Limit         OrderType = "LimitOrder"
+	Market        OrderType = "MarketOrder"
+	Stop          OrderType = "StopOrder"
+	StopLimit     OrderType = "StopLimitOrder"
+	TrailingStop  OrderType = "TrailingStopOrder"
+	CloseByLimit  OrderType = "CloseByLimitOrder"
+	CloseByStop   OrderType = "CloseByStopOrder"
+	CloseByMarket OrderType = "CloseByMarketOrder"
 )
 
 type OrderDirection string
@@ -47,3 +50,10 @@ const (
 	Long  OrderDirection = "Long"
 	Short OrderDirection = "Short"
 )
+
+func OppositeDirection(direction OrderDirection) OrderDirection {
+	if direction == Long {
+		return Short
+	}
+	return Long
+}

@@ -65,7 +65,10 @@ func Run(cfg *config.Config) {
 		log.Fatal("position composite failed")
 	}
 
-	backtestExecutor := gostrategy.NewExecutor()
+	backtestExecutor, err := gostrategy.NewExecutor()
+	if err != nil {
+		log.Fatal("backtest executor failed")
+	}
 	log.Info("backtester composite initialization")
 	backtesterComposite, err := composites.NewBacktesterComposite(
 		pgormComposite, exgAccountComposite.Service,
@@ -80,14 +83,16 @@ func Run(cfg *config.Config) {
 
 	// execute
 	if len(os.Args) < 2 {
-		log.Error("no backtester id provided")
-		return
+		log.Fatal("no backtester id provided")
 	}
 	backtesterID := os.Args[1]
 	bt, err := backtesterComposite.Service.Get(backtesterID)
-	err = backtesterComposite.Service.Run(context.Background(), bt)
+	if err != nil {
+		log.Fatal("backtester not found")
+	}
+
+	err = backtesterComposite.Service.Run(context.TODO(), bt)
 	if err != nil {
 		log.Error(err)
-		return
 	}
 }

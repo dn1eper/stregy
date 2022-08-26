@@ -1,15 +1,15 @@
 package backtester
 
-import (
-	"stregy/internal/domain/backtester"
+// import (
+// 	"stregy/internal/domain/backtester"
 
-	"github.com/stretchr/testify/mock"
-)
+// 	"github.com/stretchr/testify/mock"
+// )
 
-type MockedRepository struct {
-	mock.Mock
-}
+// type MockedRepository struct {
+// 	mock.Mock
+// }
 
-func NewMockedRepository() backtester.Repository {
-	return new(MockedRepository)
-}
+// func NewMockedRepository() backtester.Repository {
+// 	return new(MockedRepository)
+// }

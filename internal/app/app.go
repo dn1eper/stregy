@@ -77,7 +77,10 @@ func Run(cfg *config.Config) {
 		log.Fatal("position composite failed")
 	}
 
-	backtestExecutor := gostrategy.NewExecutor()
+	backtestExecutor, err := gostrategy.NewExecutor()
+	if err != nil {
+		log.Fatal("backtest executor failed")
+	}
 	log.Info("backtester composite initialization")
 	backtesterComposite, err := composites.NewBacktesterComposite(
 		pgormComposite, exgAccountComposite.Service,

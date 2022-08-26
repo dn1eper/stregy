@@ -6,11 +6,17 @@ import (
 	"stregy/internal/domain/quote"
 )
 
+type StrategyConfig struct {
+	BarsNeeded int
+	ATRperiod  int
+}
+
 type Implementation interface {
 	OnQuote(quote quote.Quote)
 	OnOrder(order order.Order)
 	OnPosition(position position.Position)
 	OnExit()
+	Config() StrategyConfig
 }
 
 type Broker interface {

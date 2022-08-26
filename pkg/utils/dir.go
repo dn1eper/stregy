@@ -36,15 +36,15 @@ func CopyFolderWin(src, dst string, skipNames []string) error {
 		if _, exists := sn[item.Name()]; !exists {
 			if item.IsDir() {
 				cmd := exec.Command("Xcopy", "/e", "/h", "/c", "/i", "/y", filepath.Join(src, item.Name()), filepath.Join(dst, item.Name()))
-				output, err := cmd.Output()
+				output, err := cmd.CombinedOutput()
 				if err != nil {
-					return fmt.Errorf("%v: %v", err, string(output))
+					return fmt.Errorf("%v: %v: %s", cmd, err, output)
 				}
 			} else {
 				cmd := exec.Command("cmd", "/c", "copy", filepath.Join(src, item.Name()), dst)
-				output, err := cmd.Output()
+				output, err := cmd.CombinedOutput()
 				if err != nil {
-					return fmt.Errorf(fmt.Sprintf("%v: %v", err, string(output)))
+					return fmt.Errorf("%v: %v: %s", cmd, err, output)
 				}
 			}
 		}

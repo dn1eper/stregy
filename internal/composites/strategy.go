@@ -10,7 +10,7 @@ import (
 )
 
 type StrategyComposite struct {
-		  strategy.Repository
+	strategy.Repository
 	Service     strategy.Service
 	userService user.Service
 	Handler     api.Handler

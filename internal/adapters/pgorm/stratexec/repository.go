@@ -39,7 +39,7 @@ func (r *repository) CreateBacktest(ctx context.Context, bt backtester.Backteste
 
 func (r *repository) GetBacktest(id string) (*backtester.Backtester, error) {
 	se := &StrategyExecution{}
-	result := r.db.First(se, id)
+	result := r.db.First(se, uuid.MustParse(id))
 	if result.Error != nil {
 		return nil, result.Error
 	}

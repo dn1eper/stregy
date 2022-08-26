@@ -14,9 +14,9 @@ import (
 )
 
 func createDatatypes(db *gorm.DB) error {
-	return db.Exec(`DO $$ BEGIN CREATE TYPE order_type AS ENUM('LimitOrder', 'MarketOrder', 'StopLimitOrder', 'StopMarketOrder', 'TrailingStopOrder', 'CloseByOrder'); EXCEPTION WHEN duplicate_object THEN null; END $$;
+	return db.Exec(`DO $$ BEGIN CREATE TYPE order_type AS ENUM('LimitOrder', 'MarketOrder', 'StopLimitOrder', 'StopOrder', 'TrailingStopOrder', 'CloseByLimitOrder', 'CloseByStopOrder', 'CloseByMarketOrder'); EXCEPTION WHEN duplicate_object THEN null; END $$;
 		DO $$ BEGIN CREATE TYPE order_status AS ENUM('SubmittedOrder', 'AcceptedOrder', 'RejectedOrder', 'PartialOrder', 'FilledOrder', 'CancelledOrder', 'ExpiredOrder', 'MarginOrder'); EXCEPTION WHEN duplicate_object THEN null; END $$;
-		DO $$ BEGIN CREATE TYPE position_status AS ENUM('OpenPosition', 'TakeProfitPosition', 'StopLossPosition', 'MarketClosePosition'); EXCEPTION WHEN duplicate_object THEN null; END $$;
+		DO $$ BEGIN CREATE TYPE position_status AS ENUM('Draft', 'OpenPosition', 'TakeProfitPosition', 'StopLossPosition', 'MarketClosePosition'); EXCEPTION WHEN duplicate_object THEN null; END $$;
 		DO $$ BEGIN CREATE TYPE order_direction AS ENUM('Long', 'Short'); EXCEPTION WHEN duplicate_object THEN null; END $$;
 		DO $$ BEGIN CREATE TYPE strategy_execution_status AS ENUM('Created', 'Running', 'Finished', 'Crashed'); EXCEPTION WHEN duplicate_object THEN null; END $$;`,
 	).Error

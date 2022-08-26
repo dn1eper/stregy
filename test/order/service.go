@@ -1,9 +1,9 @@
 package order
 
-import (
-	"stregy/internal/domain/order"
-)
+// import (
+// 	"stregy/internal/domain/order"
+// )
 
-func NewMockedService() order.Service {
-	return order.NewService()
-}
+// func NewMockedService() order.Service {
+// 	return order.NewService()
+// }

@@ -35,7 +35,7 @@ func (hook *writerHook) Levels() []logrus.Level {
 	return hook.LogLevels
 }
 
-func Init(level string, logPath string) {
+func Init(level string, logPath string, printToStdOut bool) {
 	logrus.SetReportCaller(true)
 	logrus.SetFormatter(&logrus.TextFormatter{
 		CallerPrettyfier: func(f *runtime.Frame) (string, string) {
@@ -55,11 +55,17 @@ func Init(level string, logPath string) {
 		if err != nil {
 			panic(fmt.Sprintf("[Error]: %s", err))
 		}
+		allFile.Write([]byte("----------------------------------------------------\n"))
 
 		logrus.SetOutput(ioutil.Discard) // Send all logs to nowhere by default
 
+		writer := []io.Writer{allFile}
+		if printToStdOut {
+			writer = append(writer, os.Stdout)
+		}
+
 		logrus.AddHook(&writerHook{
-			Writer:    []io.Writer{allFile, os.Stdout},
+			Writer:    writer,
 			LogLevels: logrus.AllLevels,
 		})
 	}

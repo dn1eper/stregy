@@ -1,15 +1,15 @@
 package position
 
-import (
-	"stregy/internal/domain/position"
+// import (
+// 	"stregy/internal/domain/position"
 
-	"github.com/stretchr/testify/mock"
-)
+// 	"github.com/stretchr/testify/mock"
+// )
 
-type MockedRepository struct {
-	mock.Mock
-}
+// type MockedRepository struct {
+// 	mock.Mock
+// }
 
-func NewMockedRepository() position.Repository {
-	return new(MockedRepository)
-}
+// func NewMockedRepository() position.Repository {
+// 	return new(MockedRepository)
+// }

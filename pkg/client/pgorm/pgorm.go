@@ -17,9 +17,9 @@ import (
 func NewLogger(level logrus.Level) dbLog.Interface {
 	var dbLevel dbLog.LogLevel
 	switch level {
-	case log.InfoLevel, log.DebugLevel, log.TraceLevel:
+	case log.DebugLevel, log.TraceLevel:
 		dbLevel = dbLog.Info
-	case log.WarnLevel:
+	case log.InfoLevel, log.WarnLevel:
 		dbLevel = dbLog.Warn
 	case log.ErrorLevel, log.FatalLevel, log.PanicLevel:
 		dbLevel = dbLog.Error

@@ -1,17 +1,25 @@
 package core
 
 import (
-	"stregy/internal/domain/account"
 	"stregy/internal/domain/dataseries"
 	"stregy/internal/domain/order"
 	"stregy/internal/domain/position"
 	"stregy/internal/domain/strategy"
+	"stregy/internal/domain/tradingac"
 	"time"
 )
 
 var broker strategy.Broker
-var dataSeries dataseries.DataSeries
-var acc account.Account
+var dataSeries *dataseries.DataSeries
+var tradingAccount *tradingac.Account
+
+var ATR float64
+
+func Configure(b strategy.Broker, ds *dataseries.DataSeries, ta *tradingac.Account) {
+	broker = b
+	dataSeries = ds
+	tradingAccount = ta
+}
 
 func SendOrder(direction order.OrderDirection, size float64, price float64, orderType order.OrderType) (*order.Order, error) {
 	return broker.SendOrder(direction, size, price, orderType)
@@ -43,8 +51,8 @@ func Volume(i int) float64 {
 }
 
 func ActiveOrders() []order.Order {
-	return acc.ActiveOrders()
+	return tradingAccount.ActiveOrders()
 }
 func ActivePositions() []position.Position {
-	return acc.ActivePositions()
+	return tradingAccount.ActivePositions()
 }

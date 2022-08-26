@@ -22,6 +22,7 @@ type Position struct {
 type PositionStatus string
 
 const (
+	Draft       PositionStatus = "Draft"
 	Open        PositionStatus = "OpenPosition"
 	TakeProfit  PositionStatus = "TakeProfitPosition"
 	StopLoss    PositionStatus = "StopLossPosition"

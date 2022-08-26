@@ -1,4 +1,4 @@
-package domain
+package exchange
 
 import (
 	"stregy/internal/domain/order"
@@ -9,26 +9,14 @@ import (
 type Broker interface {
 	OnQuote(q *quote.Quote)
 	OnOrder(o *order.Order)
-	OnPosition(o *position.Position)
+	OnPosition(p *position.Position)
 	OnExit()
+	FirstBars(q []quote.Quote)
 }
 
 type Exchange interface {
-	RegisterOrder(o order.Order)
-	CancelOrder(o order.Order)
-	ClosePosition(p position.Position)
-}
-
-type exchange struct {
-	broker *Broker
-}
-
-// TODO:
-func (e exchange) RegisterOrder(o order.Order)       {}
-func (e exchange) CancelOrder(o order.Order)         {}
-func (e exchange) ClosePosition(p position.Position) {}
-
-func NewExchange( /*TODO: params*/ ) Exchange {
-	// TODO
-	return exchange{}
+	RegisterPosition(p *position.Position)
+	CancelOrder(o *order.Order)
+	ClosePosition(p *position.Position)
+	Run() error
 }
