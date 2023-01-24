@@ -32,6 +32,7 @@ func (h *handler) Register(router *httprouter.Router) {
 	jsonHandler := handlers.JsonHandler(h.CreateExchangeAccount, &exgaccount1.CreateExchangeAccountDTO{})
 	authHandler := userapi.AuthenticationHandler(jsonHandler, h.userService)
 	router.POST(ExchangeAccountURL, handlers.ToSimpleHandler(authHandler))
+
 	authHandler = userapi.AuthenticationHandler(h.GetExchangeAccount, h.userService)
 	router.GET(ExchangeAccountURL, handlers.ToSimpleHandler(authHandler))
 }
@@ -61,6 +62,7 @@ func (h *handler) GetExchangeAccount(w http.ResponseWriter, r *http.Request, par
 		handlers.ReturnError(w, http.StatusInternalServerError, "")
 		return
 	}
+
 	dto := exgaccount1.GetExchangeAccountDTO{
 		ConnectionString: exchangeAccount.ConnectionString,
 		Name:             exchangeAccount.ExchangeAccountName,

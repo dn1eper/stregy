@@ -16,8 +16,7 @@ type HandleWithArgs func(http.ResponseWriter, *http.Request, httprouter.Params, 
 
 func ToSimpleHandler(hwa HandleWithArgs) httprouter.Handle {
 	return func(rw http.ResponseWriter, r *http.Request, p httprouter.Params) {
-		args := map[string]interface{}{}
-		hwa(rw, r, p, args)
+		hwa(rw, r, p, map[string]interface{}{})
 	}
 }
 
