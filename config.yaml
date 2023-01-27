@@ -9,4 +9,5 @@ postgresql:
   port: 5432
   database: postgres
   username: postgres
-  password: postgres
+  password: nikded41
+stratexec_project_path: C:/Kolia/repos/stregy_stratexec/stregy

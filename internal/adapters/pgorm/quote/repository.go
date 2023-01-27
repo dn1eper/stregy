@@ -1,7 +1,6 @@
 package quote
 
 import (
-	"context"
 	"fmt"
 	"stregy/internal/domain/quote"
 	"stregy/pkg/utils"
@@ -19,7 +18,7 @@ func NewRepository(client *gorm.DB) quote.Repository {
 	return &repository{db: client}
 }
 
-func (r repository) GetByInterval(ctx context.Context, symbol string, startTime, endTime time.Time) ([]quote.Quote, error) {
+func (r repository) GetByInterval(symbol string, startTime, endTime time.Time) ([]quote.Quote, error) {
 	tableName := strings.ToLower(symbol) + "_m1_quotes"
 	startTimeStr := utils.FormatTime(startTime)
 	endTimeStr := utils.FormatTime(endTime)
@@ -37,16 +36,16 @@ func (r repository) GetByInterval(ctx context.Context, symbol string, startTime,
 	return quotesDomain, err
 }
 
-func (r repository) Load(symbol, filePath, delimiter string) error {
-	tableName := strings.ToLower(symbol) + "_M1_quotes"
+func (r repository) Load(symbol, filePath, delimiter string, timeframe string) error {
+	tableName := fmt.Sprintf("%v_%v_quotes", strings.ToLower(symbol), timeframe)
 	return r.db.Exec(fmt.Sprintf(`
 	CREATE UNLOGGED TABLE IF NOT EXISTS temp_quotes (
 		time double precision,
-		open decimal(20, 8),
-		high decimal(20, 8),
-		low decimal(20, 8),
-		close decimal(20, 8),
-		volume real
+		open double precision,
+		high double precision,
+		low double precision,
+		close double precision,
+		volume int
 	 );
 	 
 	COPY temp_quotes FROM '%v' DELIMITERS '%v' CSV;

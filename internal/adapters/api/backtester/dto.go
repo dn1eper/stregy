@@ -1,7 +1,7 @@
 package backtester
 
 type BacktesterDTO struct {
-	StrategyID          string `json:"strategy_id"`
+	StrategyName        string `json:"strategy_name"`
 	Timeframe           int    `json:"timeframe"`
 	Symbol              string `json:"symbol"`
 	StartDate           string `json:"start_date"`

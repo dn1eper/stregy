@@ -1,7 +1,6 @@
 package symbol
 
 import (
-	"context"
 	"fmt"
 	"stregy/internal/domain/symbol"
 	"strings"
@@ -17,7 +16,7 @@ func NewRepository(client *gorm.DB) symbol.Repository {
 	return &repository{db: client}
 }
 
-func (r *repository) Exists(ctx context.Context, name string) bool {
+func (r *repository) Exists(name string) bool {
 	symbol := &Symbol{Name: name}
 	result := r.db.First(symbol)
 	if result.Error != nil {
@@ -26,7 +25,7 @@ func (r *repository) Exists(ctx context.Context, name string) bool {
 	return true
 }
 
-func (r *repository) Create(ctx context.Context, name string) (*symbol.Symbol, error) {
+func (r *repository) Create(name string) (*symbol.Symbol, error) {
 	symbol := &Symbol{Name: name}
 	result := r.db.Create(symbol)
 	if result.Error != nil {
@@ -38,7 +37,7 @@ func (r *repository) Create(ctx context.Context, name string) (*symbol.Symbol, e
 	return &symbolDomain, result.Error
 }
 
-func (r *repository) GetAll(ctx context.Context) ([]symbol.Symbol, error) {
+func (r *repository) GetAll() ([]symbol.Symbol, error) {
 	symbols := make([]Symbol, 0)
 	result := r.db.Find(&symbols)
 	symbolsDomain := make([]symbol.Symbol, 0, len(symbols))

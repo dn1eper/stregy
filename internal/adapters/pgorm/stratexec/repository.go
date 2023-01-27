@@ -1,10 +1,8 @@
 package stratexec
 
 import (
-	"context"
 	"stregy/internal/domain/backtester"
 
-	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -16,11 +14,8 @@ func NewRepository(client *gorm.DB) *repository {
 	return &repository{db: client}
 }
 
-func (r *repository) Create(ctx context.Context, bt backtester.Backtester) (*backtester.Backtester, error) {
-	strategyIDParsed, _ := uuid.Parse(bt.Strategy.ID)
-
+func (r *repository) Create(bt backtester.Backtester) (*backtester.Backtester, error) {
 	se := &StrategyExecution{
-		StrategyID:          strategyIDParsed,
 		Timeframe:           bt.Timeframe,
 		Symbol:              bt.Symbol,
 		StartTime:           bt.StartDate,

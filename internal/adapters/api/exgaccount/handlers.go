@@ -1,7 +1,6 @@
 package exgaccount
 
 import (
-	"context"
 	"net/http"
 	"stregy/internal/adapters/api"
 	userapi "stregy/internal/adapters/api/user"
@@ -43,7 +42,7 @@ func (h *handler) CreateExchangeAccount(w http.ResponseWriter, r *http.Request, 
 	user := user.User{}
 	mapstructure.Decode(args["user"], &user)
 
-	exchangeAccount, err := h.exgAccountService.Create(context.TODO(), dto, &user)
+	exchangeAccount, err := h.exgAccountService.Create(dto, &user)
 	if err != nil {
 		logger := logging.GetLogger()
 		logger.Error(err.Error())
@@ -55,7 +54,7 @@ func (h *handler) CreateExchangeAccount(w http.ResponseWriter, r *http.Request, 
 }
 
 func (h *handler) GetExchangeAccount(w http.ResponseWriter, r *http.Request, params httprouter.Params, args map[string]interface{}) {
-	exchangeAccount, err := h.exgAccountService.GetOne(context.TODO(), r.URL.Query().Get("id"))
+	exchangeAccount, err := h.exgAccountService.GetOne(r.URL.Query().Get("id"))
 	if err != nil {
 		logger := logging.GetLogger()
 		logger.Error(err.Error())

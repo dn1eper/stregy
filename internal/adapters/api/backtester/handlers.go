@@ -1,7 +1,6 @@
 package backtester
 
 import (
-	"context"
 	"net/http"
 	"stregy/internal/adapters/api"
 	userapi "stregy/internal/adapters/api/user"
@@ -59,7 +58,7 @@ func (h *handler) ExecuteBacktestHandler(
 	startDate, _ := time.Parse("2006-01-02 15:04:05", apiDTO.StartDate)
 	endDate, _ := time.Parse("2006-01-02 15:04:05", apiDTO.EndDate)
 	domainDTO := backtester.BacktesterDTO{
-		StrategyID:          apiDTO.StrategyID,
+		StrategyName:        apiDTO.StrategyName,
 		Timeframe:           apiDTO.Timeframe,
 		Symbol:              apiDTO.Symbol,
 		StartDate:           startDate,
@@ -68,7 +67,7 @@ func (h *handler) ExecuteBacktestHandler(
 		BarsNeeded:          apiDTO.BarsNeeded,
 		ATRperiod:           apiDTO.ATRperiod,
 	}
-	btDomain, err := h.backtesterService.Create(context.TODO(), domainDTO)
+	btDomain, err := h.backtesterService.Create(domainDTO)
 	if err != nil {
 		logger.Error(err.Error())
 		handlers.ReturnError(w, http.StatusInternalServerError, "")
@@ -79,7 +78,7 @@ func (h *handler) ExecuteBacktestHandler(
 	btDomain.ATRperiod = apiDTO.ATRperiod
 
 	// Execute.
-	err = h.backtesterService.Run(context.TODO(), btDomain)
+	err = h.backtesterService.Run(btDomain)
 	if err != nil {
 		logger.Error(err.Error())
 		handlers.ReturnError(w, http.StatusInternalServerError, err.Error())

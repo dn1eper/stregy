@@ -1,7 +1,6 @@
 package tick
 
 import (
-	"context"
 	"fmt"
 	"stregy/internal/domain/tick"
 	"stregy/pkg/utils"
@@ -20,7 +19,7 @@ func NewRepository(client *gorm.DB) tick.Repository {
 	return &repository{db: client}
 }
 
-func (r repository) GetByInterval(ctx context.Context, symbol string, startTime, endTime time.Time) ([]tick.Tick, error) {
+func (r repository) GetByInterval(symbol string, startTime, endTime time.Time) ([]tick.Tick, error) {
 	tableName := strings.ToLower(symbol) + "_ticks"
 	startTimeStr := utils.FormatTime(startTime)
 	endTimeStr := utils.FormatTime(endTime)

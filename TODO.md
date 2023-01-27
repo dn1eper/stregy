@@ -1,8 +1,7 @@
-## for today
-Testing template
-Logging in file
-Fill context (for what?)
+## today
+high order resulution?
 
-## for the future
+## future
+use int64 instead of float64 for price?
 Partial position?
 Transaction approach in all financial operations

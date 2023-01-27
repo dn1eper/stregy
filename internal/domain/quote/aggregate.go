@@ -1,12 +1,11 @@
 package quote
 
 import (
-	"context"
 	"errors"
 	"time"
 )
 
-func Aggregate(ctx context.Context, quotes []Quote, timeframeSec int) ([]Quote, error) {
+func Aggregate(quotes []Quote, timeframeSec int) ([]Quote, error) {
 	quoteTime := quotes[0].Time
 	if quoteTime.UnixNano()%1000000 != 0 {
 		return nil, errors.New("quotes are not alligned to miliseconds")
@@ -29,10 +28,10 @@ func Aggregate(ctx context.Context, quotes []Quote, timeframeSec int) ([]Quote, 
 
 	for idx, quote := range quotes {
 		if quote.Time.Before(nextQuoteTime) && idx != len(quotes)-1 {
-			if high.LessThan(quote.High) {
+			if high < quote.High {
 				high = quote.High
 			}
-			if quote.Low.LessThan(low) {
+			if quote.Low < low {
 				low = quote.Low
 			}
 		} else {

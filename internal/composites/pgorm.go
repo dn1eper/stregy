@@ -1,7 +1,6 @@
 package composites
 
 import (
-	"context"
 	"stregy/internal/adapters/pgorm/migration"
 	"stregy/pkg/client/pgorm"
 
@@ -12,8 +11,8 @@ type PGormComposite struct {
 	db *gorm.DB
 }
 
-func NewPGormComposite(ctx context.Context, Host, Port, Username, Password, Database string) (*PGormComposite, error) {
-	client, _ := pgorm.NewClient(ctx, Host, Port, Username, Password, Database)
+func NewPGormComposite(Host, Port, Username, Password, Database string) (*PGormComposite, error) {
+	client, _ := pgorm.NewClient(Host, Port, Username, Password, Database)
 	err := migration.Migrate(client)
 	if err != nil {
 		return nil, err

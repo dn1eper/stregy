@@ -1,7 +1,6 @@
 package app
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"net"
@@ -21,7 +20,7 @@ func Run(cfg *config.Config) {
 	router := httprouter.New()
 
 	logger.Info("pgorm composite initialization")
-	pgormComposite, err := composites.NewPGormComposite(context.Background(), cfg.PosgreSQL.Host, cfg.PosgreSQL.Port, cfg.PosgreSQL.Username, cfg.PosgreSQL.Password, cfg.PosgreSQL.Database)
+	pgormComposite, err := composites.NewPGormComposite(cfg.PosgreSQL.Host, cfg.PosgreSQL.Port, cfg.PosgreSQL.Username, cfg.PosgreSQL.Password, cfg.PosgreSQL.Database)
 	if err != nil {
 		logger.Fatal("pgorm composite failed")
 	}
@@ -44,7 +43,6 @@ func Run(cfg *config.Config) {
 	if err != nil {
 		logger.Fatal("tick composite failed")
 	}
-	// tickComposite.Service.Load(context.TODO(), )
 
 	logger.Info("strategy composite initialization")
 	strategyComposite, err := composites.NewStrategyComposite(pgormComposite, userComposite.Service)

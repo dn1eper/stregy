@@ -1,12 +1,11 @@
 package tick
 
 import (
-	"context"
 	"time"
 )
 
 type Service interface {
-	Get(ctx context.Context, symbol string, start, end time.Time) chan Tick
+	Get(symbol string, start, end time.Time) chan Tick
 	Load(symbol, filePath, delimiter string) error
 }
 
@@ -22,14 +21,14 @@ func (s service) Load(symbol, filePath, delimiter string) error {
 	return s.repository.Load(symbol, filePath, delimiter)
 }
 
-func (s *service) Get(ctx context.Context, symbol string, start, end time.Time) chan Tick {
+func (s *service) Get(symbol string, start, end time.Time) chan Tick {
 	ch := make(chan Tick, 10000)
-	go tickGenerator(ctx, ch, s, symbol, start, end)
+	go tickGenerator(ch, s, symbol, start, end)
 
 	return ch
 }
 
-func tickGenerator(ctx context.Context, ch chan<- Tick, s *service, symbol string, start, end time.Time) {
+func tickGenerator(ch chan<- Tick, s *service, symbol string, start, end time.Time) {
 	batchStart := start
 	batchEnd := batchStart.AddDate(0, 0, 1)
 	if batchEnd.After(end) {
@@ -37,7 +36,7 @@ func tickGenerator(ctx context.Context, ch chan<- Tick, s *service, symbol strin
 	}
 
 	for true {
-		ticks, err := s.repository.GetByInterval(ctx, symbol, batchStart, batchEnd)
+		ticks, err := s.repository.GetByInterval(symbol, batchStart, batchEnd)
 		if err != nil {
 			panic(err)
 		}

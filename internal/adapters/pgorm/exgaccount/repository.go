@@ -1,7 +1,6 @@
 package exgaccount
 
 import (
-	"context"
 	"fmt"
 	"stregy/internal/domain/exgaccount"
 	user1 "stregy/internal/domain/user"
@@ -18,7 +17,7 @@ func NewRepository(client *gorm.DB) exgaccount.Repository {
 	return &repository{db: client}
 }
 
-func (r *repository) Create(ctx context.Context, exgAccount exgaccount.ExchangeAccount, user *user1.User) (*exgaccount.ExchangeAccount, error) {
+func (r *repository) Create(exgAccount exgaccount.ExchangeAccount, user *user1.User) (*exgaccount.ExchangeAccount, error) {
 	userID, err := uuid.Parse(user.ID)
 	exgAccountDB := &ExchangeAccount{
 		UserID:              userID,
@@ -38,7 +37,7 @@ func (r *repository) Create(ctx context.Context, exgAccount exgaccount.ExchangeA
 	return exgAccountDB.ToDomain(), nil
 }
 
-func (r *repository) GetAll(ctx context.Context, userID string) ([]*exgaccount.ExchangeAccount, error) {
+func (r *repository) GetAll(userID string) ([]*exgaccount.ExchangeAccount, error) {
 	userUUID, err := uuid.Parse(userID)
 	if err != nil {
 		return nil, err
@@ -56,7 +55,7 @@ func (r *repository) GetAll(ctx context.Context, userID string) ([]*exgaccount.E
 	return exgAccountsDomain, nil
 }
 
-func (r *repository) GetOne(ctx context.Context, exgAccountID string) (*exgaccount.ExchangeAccount, error) {
+func (r *repository) GetOne(exgAccountID string) (*exgaccount.ExchangeAccount, error) {
 	uuid, _ := uuid.Parse(exgAccountID)
 	exgAccount := ExchangeAccount{ExchangeAccountID: uuid}
 	err := r.db.First(&exgAccount).Error

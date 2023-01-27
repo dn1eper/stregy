@@ -1,17 +1,14 @@
 package position
 
 import (
-	"context"
 	"stregy/internal/domain/order"
-
-	"github.com/shopspring/decimal"
 )
 
 type Service interface {
-	Create(ctx context.Context) (*Position, error)
-	Open(ctx context.Context, position Position, size decimal.Decimal) (*Position, error)
-	TakeProfit(ctx context.Context, position Position, size decimal.Decimal) (*Position, error)
-	StopLoss(ctx context.Context, position Position, size decimal.Decimal) (*Position, error)
+	Create() (*Position, error)
+	Open(position Position, size float64) (*Position, error)
+	TakeProfit(position Position, size float64) (*Position, error)
+	StopLoss(position Position, size float64) (*Position, error)
 }
 
 type service struct {
@@ -23,22 +20,22 @@ func NewService(repository Repository, orderService order.Service) Service {
 	return &service{repository: repository, orderService: orderService}
 }
 
-func (s *service) Create(ctx context.Context) (*Position, error) {
+func (s *service) Create() (*Position, error) {
 	panic("not implemented")
 }
 
-func (s *service) Open(ctx context.Context, position Position, size decimal.Decimal) (_ *Position, err error) {
-	position.MainOrder, err = s.orderService.Fill(ctx, position.MainOrder.ID, size)
+func (s *service) Open(position Position, size float64) (_ *Position, err error) {
+	position.MainOrder, err = s.orderService.Fill(position.MainOrder.ID, size)
 	if err != nil {
 		return nil, err
 	}
 
-	position.TakeOrder, err = s.orderService.Submit(ctx, position.TakeOrder.ID)
+	position.TakeOrder, err = s.orderService.Submit(position.TakeOrder.ID)
 	if err != nil {
 		return nil, err
 	}
 
-	position.StopOrder, err = s.orderService.Submit(ctx, position.StopOrder.ID)
+	position.StopOrder, err = s.orderService.Submit(position.StopOrder.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -54,10 +51,10 @@ func (s *service) Open(ctx context.Context, position Position, size decimal.Deci
 	return &position, nil
 }
 
-func (s *service) TakeProfit(ctx context.Context, position Position, size decimal.Decimal) (*Position, error) {
+func (s *service) TakeProfit(position Position, size float64) (*Position, error) {
 	panic("not implemented")
 }
 
-func (s *service) StopLoss(ctx context.Context, position Position, size decimal.Decimal) (*Position, error) {
+func (s *service) StopLoss(position Position, size float64) (*Position, error) {
 	panic("not implemented")
 }

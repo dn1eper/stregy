@@ -1,7 +1,6 @@
 package user
 
 import (
-	"context"
 	"net/http"
 	"stregy/internal/adapters/api"
 	"stregy/pkg/handlers"
@@ -40,7 +39,7 @@ func (h *handler) CreateUser(w http.ResponseWriter, r *http.Request, params http
 	dto := user.CreateUserDTO{}
 	mapstructure.Decode(args["json"], &dto)
 
-	user, err := h.userService.Create(context.TODO(), &dto)
+	user, err := h.userService.Create(&dto)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		logger.Error(err.Error())
@@ -58,7 +57,7 @@ func AuthenticationHandler(h handlers.HandleWithArgs, s user.Service) handlers.H
 			return
 		}
 
-		u, err := s.GetByAPIKey(context.TODO(), apiKey)
+		u, err := s.GetByAPIKey(apiKey)
 		if err != nil {
 			http.Error(w, "Invalid API key", http.StatusNotFound)
 			return

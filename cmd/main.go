@@ -7,7 +7,6 @@ import (
 )
 
 func main() {
-	// entry point
 	logging.Init()
 	logger := logging.GetLogger()
 

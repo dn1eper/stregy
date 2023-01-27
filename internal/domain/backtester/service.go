@@ -1,8 +1,6 @@
 package backtester
 
 import (
-	"context"
-	"fmt"
 	"stregy/internal/domain/exgaccount"
 	"stregy/internal/domain/position"
 	"stregy/internal/domain/quote"
@@ -11,8 +9,8 @@ import (
 )
 
 type Service interface {
-	Run(ctx context.Context, b *Backtester) error
-	Create(ctx context.Context, dto BacktesterDTO) (*Backtester, error)
+	Run(b *Backtester) error
+	Create(dto BacktesterDTO) (*Backtester, error)
 }
 
 type service struct {
@@ -22,6 +20,8 @@ type service struct {
 	exgAccService   exgaccount.Service
 	strategyService strategy.Service
 	positionService position.Service
+
+	stratexecProjectPath string
 
 	positions []*position.Position
 }
@@ -44,10 +44,9 @@ func NewService(
 	}
 }
 
-func (s *service) Create(ctx context.Context, dto BacktesterDTO) (*Backtester, error) {
-	strat := strategy.Strategy{ID: dto.StrategyID}
+func (s *service) Create(dto BacktesterDTO) (*Backtester, error) {
 	bt := Backtester{
-		Strategy:            strat,
+		StrategyName:        dto.StrategyName,
 		StartDate:           dto.StartDate,
 		EndDate:             dto.EndDate,
 		Symbol:              dto.Symbol,
@@ -55,10 +54,10 @@ func (s *service) Create(ctx context.Context, dto BacktesterDTO) (*Backtester, e
 		HighOrderResolution: dto.HighOrderResolution,
 		Status:              Created,
 	}
-	return s.repository.Create(ctx, bt)
+	return s.repository.Create(bt)
 }
 
 // Update Quotes in sync, mb prep new Quotes in seperate goroutine
-func (s *service) Run(ctx context.Context, bt *Backtester) (err error) {
-	return fmt.Errorf("not implemented")
+func (s *service) Run(bt *Backtester) (err error) {
+	return err
 }

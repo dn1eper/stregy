@@ -6,20 +6,19 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/shopspring/decimal"
 )
 
 type Order struct {
 	OrderID             uuid.UUID `gorm:"primaryKey;type:uuid;default:uuid_generate_v4()"`
 	StrategyExecution   stratexec.StrategyExecution
 	StrategyExecutionID uuid.UUID
-	Price               decimal.Decimal `gorm:"type:decimal;not null"`
-	Direction           OrderDirection  `gorm:"type:order_direction"`
-	Size                decimal.Decimal `gorm:"type:decimal;not null"`
-	Type                OrderType       `gorm:"type:order_type;not null"`
-	ExecutionTime       time.Time       `gorm:"type:timestamp"`
-	ExecutionPrice      decimal.Decimal `gorm:"type:decimal"`
-	Status              OrderStatus     `gorm:"type:order_status;not null"`
+	Price               float64        `gorm:"double precision;not null"`
+	Direction           OrderDirection `gorm:"type:order_direction"`
+	Size                float64        `gorm:"double precision;not null"`
+	Type                OrderType      `gorm:"type:order_type;not null"`
+	ExecutionTime       time.Time      `gorm:"type:timestamp"`
+	ExecutionPrice      float64        `gorm:"double precision"`
+	Status              OrderStatus    `gorm:"type:order_status;not null"`
 }
 
 type OrderType string

@@ -1,7 +1,6 @@
 package strategy
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -14,13 +13,11 @@ import (
 	strategy1 "stregy/internal/domain/strategy"
 
 	"github.com/julienschmidt/httprouter"
-	"github.com/mitchellh/mapstructure"
 	"github.com/tjarratt/babble"
 )
 
 const (
-	strategyURL       = "/api/strategy"
-	strategyExistsURL = "/api/strategy-exists"
+	strategyURL = "/api/strategy"
 )
 
 type handler struct {
@@ -35,13 +32,12 @@ func NewHandler(service strategy1.Service, userService user.Service) api.Handler
 func (h *handler) Register(router *httprouter.Router) {
 	authHandler := user1.AuthenticationHandler(h.CreateStrategy, h.userService)
 	router.POST(strategyURL, handlers.ToSimpleHandler(authHandler))
-	router.GET(strategyExistsURL, h.StrategyExists)
 }
 
 func (h *handler) CreateStrategy(w http.ResponseWriter, r *http.Request, params httprouter.Params, args map[string]interface{}) {
 	logger := logging.GetLogger()
 
-	err := r.ParseMultipartForm(2000000000)
+	err := r.ParseMultipartForm(1024 * 1024 * 1024)
 	if err != nil {
 		fmt.Printf("Error parsing form: %v\n", err)
 	}
@@ -64,24 +60,10 @@ func (h *handler) CreateStrategy(w http.ResponseWriter, r *http.Request, params 
 		handlers.ReturnError(w, http.StatusBadRequest, "implementation is empty")
 	}
 
-	user := user.User{}
-	mapstructure.Decode(args["user"], &user)
-
-	strat, err := h.strategyService.Create(context.TODO(), dto)
-	if err != nil {
+	if err = h.strategyService.Save(dto); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		logger.Error(err.Error())
 	}
 
-	handlers.JsonResponseWriter(w, map[string]string{"strategy_id": strat.ID})
-}
-
-func (h *handler) StrategyExists(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
-	response := "true"
-	_, err := h.strategyService.GetByUUID(context.TODO(), r.URL.Query().Get("id"))
-	if err != nil {
-		response = "false"
-		fmt.Println(err.Error())
-	}
-	handlers.JsonResponseWriter(w, map[string]string{"response": response})
+	handlers.JsonResponseWriter(w, map[string]string{"response": "ok"})
 }

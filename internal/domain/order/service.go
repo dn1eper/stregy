@@ -1,16 +1,10 @@
 package order
 
-import (
-	"context"
-
-	"github.com/shopspring/decimal"
-)
-
 type Service interface {
-	Create(ctx context.Context) (Order, error)
-	Open(ctx context.Context, id string) error
-	Fill(ctx context.Context, id string, size decimal.Decimal) (Order, error)
-	Submit(ctx context.Context, id string) (Order, error)
+	Create() (Order, error)
+	Open(id string) error
+	Fill(id string, size float64) (Order, error)
+	Submit(id string) (Order, error)
 }
 
 type service struct{}
@@ -19,18 +13,18 @@ func NewService() Service {
 	return &service{}
 }
 
-func (s *service) Create(ctx context.Context) (Order, error) {
+func (s *service) Create() (Order, error) {
 	panic("not implemented")
 }
 
-func (s *service) Open(ctx context.Context, id string) error {
+func (s *service) Open(id string) error {
 	panic("not implemented")
 }
 
-func (s *service) Fill(ctx context.Context, id string, size decimal.Decimal) (Order, error) {
+func (s *service) Fill(id string, size float64) (Order, error) {
 	panic("not implemented")
 }
 
-func (s *service) Submit(ctx context.Context, id string) (Order, error) {
+func (s *service) Submit(id string) (Order, error) {
 	panic("not implemented")
 }

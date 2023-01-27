@@ -4,7 +4,6 @@ import (
 	"stregy/internal/domain/order"
 	"stregy/internal/domain/position"
 	"stregy/internal/domain/quote"
-	"stregy/internal/domain/strategy"
 	"time"
 )
 
@@ -18,13 +17,13 @@ const (
 )
 
 type Backtester struct {
-	ID        string
-	Strategy  strategy.Strategy
-	StartDate time.Time
-	EndDate   time.Time
-	Symbol    string
-	Timeframe int
-	Status    StrategyExecutionStatus
+	ID           string
+	StrategyName string
+	StartDate    time.Time
+	EndDate      time.Time
+	Symbol       string
+	Timeframe    int
+	Status       StrategyExecutionStatus
 
 	HighOrderResolution bool
 	BarsNeeded          int

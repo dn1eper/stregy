@@ -3,7 +3,7 @@ package backtester
 import "time"
 
 type BacktesterDTO struct {
-	StrategyID          string
+	StrategyName        string
 	Timeframe           int
 	Symbol              string
 	StartDate           time.Time

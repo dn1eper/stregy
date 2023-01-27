@@ -3,8 +3,6 @@ package order
 import (
 	"stregy/internal/domain/quote"
 	"time"
-
-	"github.com/shopspring/decimal"
 )
 
 type OrderStatus int64
@@ -40,15 +38,15 @@ const (
 type Order struct {
 	ID             string
 	Direction      OrderDirection
-	Size           decimal.Decimal
-	Price          decimal.Decimal
+	Size           float64
+	Price          float64
 	Status         OrderStatus
 	Type           OrderType
 	ExecutionTime  time.Time
-	ExecutionPrice decimal.Decimal
+	ExecutionPrice float64
 }
 
 func (o Order) IsTouched(quote quote.Quote) bool {
-	return o.Direction == Long && o.Price.LessThanOrEqual(quote.High) ||
-		o.Direction == Short && o.Price.GreaterThanOrEqual(quote.Low)
+	return o.Direction == Long && o.Price <= quote.High ||
+		o.Direction == Short && o.Price <= quote.Low
 }

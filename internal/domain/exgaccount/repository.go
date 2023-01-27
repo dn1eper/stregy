@@ -1,12 +1,11 @@
 package exgaccount
 
 import (
-	"context"
 	"stregy/internal/domain/user"
 )
 
 type Repository interface {
-	GetAll(ctx context.Context, userID string) ([]*ExchangeAccount, error)
-	GetOne(ctx context.Context, exgAccountID string) (*ExchangeAccount, error)
-	Create(ctx context.Context, exgAccount ExchangeAccount, user *user.User) (*ExchangeAccount, error)
+	GetAll(userID string) ([]*ExchangeAccount, error)
+	GetOne(exgAccountID string) (*ExchangeAccount, error)
+	Create(exgAccount ExchangeAccount, user *user.User) (*ExchangeAccount, error)
 }

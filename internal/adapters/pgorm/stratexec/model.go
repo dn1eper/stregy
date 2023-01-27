@@ -3,7 +3,6 @@ package stratexec
 import (
 	"database/sql/driver"
 	"stregy/internal/adapters/pgorm/exgaccount"
-	"stregy/internal/adapters/pgorm/strategy"
 	"time"
 
 	"github.com/google/uuid"
@@ -22,8 +21,6 @@ func (se StrategyExecutionStatus) Value() (driver.Value, error) {
 
 type StrategyExecution struct {
 	StrategyExecutionID uuid.UUID `gorm:"type:uuid;primaryKey;default:uuid_generate_v4()"`
-	Strategy            strategy.Strategy
-	StrategyID          uuid.UUID
 	ExchangeAccount     exgaccount.ExchangeAccount
 	ExchangeAccountID   *uuid.UUID
 	Timeframe           int                     `gorm:"type:int;not null;check:timeframe > 0"`

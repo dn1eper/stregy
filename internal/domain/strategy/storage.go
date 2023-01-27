@@ -1,5 +1,5 @@
 package strategy
 
 type Storage interface {
-	SaveStrategy(implementation *string, strategyID string) error
+	SaveStrategy(name string, implementation *string) (string, error)
 }
