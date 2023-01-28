@@ -18,30 +18,32 @@ func NewService(repository Repository) Service {
 	return &service{repository: repository}
 }
 
-func (s *service) Get(symbol string, start, end time.Time, timeframe int) chan Quote {
+func (s *service) Get(symbol string, start, end time.Time, timeframeSec int) chan Quote {
 	ch := make(chan Quote, 256)
-	go quoteGenerator(ch, s, symbol, start, end, timeframe)
+	go quoteGenerator(ch, s, symbol, start, end, timeframeSec)
 	return ch
 }
 
-func quoteGenerator(ch chan<- Quote, s *service, symbol string, start, end time.Time, timeframe int) {
-	timeframeSec := timeframe * 60
+func quoteGenerator(ch chan<- Quote, s *service, symbol string, start, end time.Time, timeframeSec int) error {
 	batchStart := start
 	batchEnd := batchStart.AddDate(0, 0, 1)
 	if batchEnd.After(end) {
 		batchEnd = end
 	}
 	if 86400%timeframeSec != 0 {
-		panic("one day is not a multiple of requested timeframe")
+		return fmt.Errorf("one day is not a multiple of requested timeframe")
 	}
 
-	for true {
+	for {
 		quotes, err := s.repository.GetByInterval(symbol, batchStart, batchEnd)
+		if err != nil {
+			return err
+		}
 		if len(quotes) == 0 {
 			break
 		}
 
-		quotesAgg, err := Aggregate(quotes, timeframeSec)
+		quotesAgg, err := AggregateQuotes(quotes, timeframeSec)
 		if err != nil {
 			panic(fmt.Sprintf("error aggregating quotes: %v\n", err))
 		}
@@ -57,6 +59,8 @@ func quoteGenerator(ch chan<- Quote, s *service, symbol string, start, end time.
 		}
 	}
 	close(ch)
+
+	return nil
 }
 
 func (s *service) Load(symbol, filePath, delimiter string, timeframe string) error {

@@ -2,6 +2,7 @@ package backtester
 
 import (
 	"net/http"
+	"os"
 	"stregy/internal/adapters/api"
 	userapi "stregy/internal/adapters/api/user"
 	"stregy/internal/domain/backtester"
@@ -16,7 +17,8 @@ import (
 )
 
 const (
-	strategyExecutionURL = "/api/backtest"
+	launchBacktestURL  = "/api/backtest"
+	executeBacktestURL = "/api/execute_backtest"
 )
 
 type handler struct {
@@ -36,12 +38,15 @@ func NewHandler(
 }
 
 func (h *handler) Register(router *httprouter.Router) {
-	createSEHandler := handlers.JsonHandler(h.ExecuteBacktestHandler, &BacktesterDTO{})
+	createSEHandler := handlers.JsonHandler(h.LaunchBacktestHandler, &BacktesterDTO{})
 	userHandler := userapi.AuthenticationHandler(createSEHandler, h.userService)
-	router.POST(strategyExecutionURL, handlers.ToSimpleHandler(userHandler))
+	router.POST(launchBacktestURL, handlers.ToSimpleHandler(userHandler))
+
+	userHandler = userapi.AuthenticationHandler(h.RunBacktestHandler, h.userService)
+	router.POST(executeBacktestURL, handlers.ToSimpleHandler(userHandler))
 }
 
-func (h *handler) ExecuteBacktestHandler(
+func (h *handler) LaunchBacktestHandler(
 	w http.ResponseWriter,
 	r *http.Request,
 	params httprouter.Params,
@@ -57,7 +62,7 @@ func (h *handler) ExecuteBacktestHandler(
 	// Create db record.
 	startDate, _ := time.Parse("2006-01-02 15:04:05", apiDTO.StartDate)
 	endDate, _ := time.Parse("2006-01-02 15:04:05", apiDTO.EndDate)
-	domainDTO := backtester.BacktesterDTO{
+	domainDTO := backtester.BacktestDTO{
 		StrategyName:        apiDTO.StrategyName,
 		Timeframe:           apiDTO.Timeframe,
 		Symbol:              apiDTO.Symbol,
@@ -78,12 +83,22 @@ func (h *handler) ExecuteBacktestHandler(
 	btDomain.ATRperiod = apiDTO.ATRperiod
 
 	// Execute.
-	err = h.backtesterService.Run(btDomain)
+	err = h.backtesterService.Launch(btDomain)
 	if err != nil {
 		logger.Error(err.Error())
 		handlers.ReturnError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	handlers.JsonResponseWriter(w, map[string]string{"backtest_id": btDomain.ID})
+	handlers.JsonResponseWriter(w, map[string]string{"backtest_id": btDomain.Id})
+}
+
+func (h *handler) RunBacktestHandler(
+	w http.ResponseWriter,
+	r *http.Request,
+	params httprouter.Params,
+	args map[string]interface{},
+) {
+	h.backtesterService.Run()
+	os.Exit(0)
 }

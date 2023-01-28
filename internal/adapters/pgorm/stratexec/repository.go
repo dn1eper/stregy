@@ -3,6 +3,7 @@ package stratexec
 import (
 	"stregy/internal/domain/backtester"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -14,12 +15,13 @@ func NewRepository(client *gorm.DB) *repository {
 	return &repository{db: client}
 }
 
-func (r *repository) Create(bt backtester.Backtester) (*backtester.Backtester, error) {
+func (r *repository) Create(bt backtester.Backtest) (*backtester.Backtest, error) {
 	se := &StrategyExecution{
+		StrategyName:        bt.StrategyName,
 		Timeframe:           bt.Timeframe,
 		Symbol:              bt.Symbol,
-		StartTime:           bt.StartDate,
-		EndTime:             bt.EndDate,
+		StartTime:           bt.StartTime,
+		EndTime:             bt.EndTime,
 		HighOrderResolution: bt.HighOrderResolution,
 		Status:              StrategyExecutionStatus(bt.Status),
 	}
@@ -28,6 +30,25 @@ func (r *repository) Create(bt backtester.Backtester) (*backtester.Backtester, e
 		return nil, result.Error
 	}
 
-	bt.ID = se.StrategyExecutionID.String()
+	bt.Id = se.StrategyExecutionId.String()
 	return &bt, nil
+}
+
+func (r *repository) Get(id string) (*StrategyExecution, error) {
+	parsed, err := uuid.Parse(id)
+	if err != nil {
+		return nil, err
+	}
+	strategyExecution := &StrategyExecution{StrategyExecutionId: parsed}
+	result := r.db.First(strategyExecution)
+
+	return strategyExecution, result.Error
+}
+
+func (r *repository) GetBacktest(id string) (*backtester.Backtest, error) {
+	strategyExecution, err := r.Get(id)
+	if err != nil {
+		return nil, err
+	}
+	return strategyExecution.ToBacktest(), err
 }

@@ -2,7 +2,7 @@ package backtester
 
 import "time"
 
-type BacktesterDTO struct {
+type BacktestDTO struct {
 	StrategyName        string
 	Timeframe           int
 	Symbol              string

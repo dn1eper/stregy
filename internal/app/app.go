@@ -5,6 +5,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"os"
 	"stregy/internal/composites"
 	"stregy/internal/config"
 	"stregy/pkg/logging"
@@ -13,11 +14,33 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
+type AppMode int
+
+const (
+	Server AppMode = iota
+	Backtest
+)
+
+var appMode AppMode
+
+func SetAppMode() {
+	if len(os.Args) < 2 {
+		appMode = Server
+		return
+	}
+
+	switch os.Args[1] {
+	case "--backtest":
+		appMode = Backtest
+	default:
+		panic(fmt.Errorf("unknown app mode: %s", os.Args[1]))
+	}
+}
+
 func Run(cfg *config.Config) {
 	logger := logging.GetLogger()
 
-	logger.Info("router initialization")
-	router := httprouter.New()
+	SetAppMode()
 
 	logger.Info("pgorm composite initialization")
 	pgormComposite, err := composites.NewPGormComposite(cfg.PosgreSQL.Host, cfg.PosgreSQL.Port, cfg.PosgreSQL.Username, cfg.PosgreSQL.Password, cfg.PosgreSQL.Database)
@@ -30,7 +53,6 @@ func Run(cfg *config.Config) {
 	if err != nil {
 		logger.Fatal("user composite failed")
 	}
-	userComposite.Handler.Register(router)
 
 	logger.Info("quote composite initialization")
 	quoteComposite, err := composites.NewQuoteComposite(pgormComposite)
@@ -49,14 +71,12 @@ func Run(cfg *config.Config) {
 	if err != nil {
 		logger.Fatal("strategy composite failed")
 	}
-	strategyComposite.Handler.Register(router)
 
 	logger.Info("exchange account composite initialization")
 	exgAccountComposite, err := composites.NewExchangeAccountComposite(pgormComposite, userComposite.Service)
 	if err != nil {
 		logger.Fatal("exchange account composite failed")
 	}
-	exgAccountComposite.Handler.Register(router)
 
 	logger.Info("symbol composite initialization")
 	_, err = composites.NewSymbolComposite(pgormComposite)
@@ -86,9 +106,35 @@ func Run(cfg *config.Config) {
 	if err != nil {
 		logger.Fatal("backtester composite failed")
 	}
+
+	switch appMode {
+	case Server:
+		StartServer(userComposite, strategyComposite, exgAccountComposite, backtesterComposite)
+	case Backtest:
+		err := backtesterComposite.Service.Run()
+		if err != nil {
+			logger.Error(err.Error())
+		}
+	}
+}
+
+func StartServer(
+	userComposite *composites.UserComposite,
+	strategyComposite *composites.StrategyComposite,
+	exgAccountComposite *composites.ExchangeAccountComposite,
+	backtesterComposite *composites.BacktesterComposite) {
+	logger := logging.GetLogger()
+
+	logger.Info("router initialization")
+	router := httprouter.New()
+
+	userComposite.Handler.Register(router)
+	strategyComposite.Handler.Register(router)
+	exgAccountComposite.Handler.Register(router)
 	backtesterComposite.Handler.Register(router)
 
 	logger.Info("listener initialization")
+	cfg := config.GetConfig()
 	listener, err := net.Listen("tcp", fmt.Sprintf("%v:%v", cfg.Listen.BindIP, cfg.Listen.Port))
 	if err != nil {
 		panic(err)

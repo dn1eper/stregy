@@ -16,11 +16,11 @@ const (
 	Crashed  StrategyExecutionStatus = "Crashed"
 )
 
-type Backtester struct {
-	ID           string
+type Backtest struct {
+	Id           string
 	StrategyName string
-	StartDate    time.Time
-	EndDate      time.Time
+	StartTime    time.Time
+	EndTime      time.Time
 	Symbol       string
 	Timeframe    int
 	Status       StrategyExecutionStatus

@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-func Aggregate(quotes []Quote, timeframeSec int) ([]Quote, error) {
+func AggregateQuotes(quotes []Quote, timeframeSec int) ([]Quote, error) {
 	quoteTime := quotes[0].Time
 	if quoteTime.UnixNano()%1000000 != 0 {
 		return nil, errors.New("quotes are not alligned to miliseconds")

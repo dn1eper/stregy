@@ -4,7 +4,6 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"stregy/internal/config"
 	"stregy/internal/domain/strategy"
 	"stregy/pkg/utils"
 )
@@ -16,15 +15,9 @@ func NewStorage() strategy.Storage {
 }
 
 func (s storage) SaveStrategy(name string, implementation *string) (string, error) {
-	var err error
-	defer func() {
-		if err != nil {
-			panic(err)
-		}
-	}()
-
-	dir := path.Join(config.GetConfig().StratexecProjectPath, "local", "strategies", name)
-	os.Mkdir(dir, os.ModePerm)
+	wd, _ := os.Getwd()
+	dir := path.Join(wd, "local", "strategies", name)
+	os.MkdirAll(dir, os.ModePerm)
 	utils.RemoveContents(dir)
 
 	archivePath := filepath.Join(dir, "strategy.zip")

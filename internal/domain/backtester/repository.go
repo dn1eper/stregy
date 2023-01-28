@@ -1,5 +1,6 @@
 package backtester
 
 type Repository interface {
-	Create(backtester Backtester) (*Backtester, error)
+	Create(backtester Backtest) (*Backtest, error)
+	GetBacktest(id string) (*Backtest, error)
 }
