@@ -5,6 +5,6 @@ import (
 )
 
 type Repository interface {
-	GetByInterval(symbol string, start_time, end_time time.Time) ([]Quote, error)
-	Load(symbol, filePath, delimiter string, timeframe string) error
+	Get(symbol string, startTime, endTime time.Time, limit, timeframeSec int) ([]Quote, error)
+	Load(symbol, filePath, delimiter string, timeframeSec int) error
 }

@@ -2,6 +2,7 @@ package quote
 
 import (
 	"errors"
+	"stregy/pkg/logging"
 	"time"
 )
 
@@ -12,6 +13,7 @@ func AggregateQuotes(quotes []Quote, timeframeSec int) ([]Quote, error) {
 	}
 	inputTimeframeMSC := quotes[1].Time.Sub(quotes[0].Time).Milliseconds()
 	if inputTimeframeMSC > int64(timeframeSec)*1000 {
+		logging.GetLogger().Error("base timeframe is bigger than required: len(quotes) = %v, inputTimeframeMsc = %v", len(quotes), inputTimeframeMSC)
 		return nil, errors.New("base timeframe is bigger than required")
 	}
 	if inputTimeframeMSC == int64(timeframeSec)*1000 {

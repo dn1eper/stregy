@@ -1,11 +1,10 @@
-package backtester
+package bt
 
 import (
 	"net/http"
-	"os"
 	"stregy/internal/adapters/api"
 	userapi "stregy/internal/adapters/api/user"
-	"stregy/internal/domain/backtester"
+	"stregy/internal/domain/btservice"
 	"stregy/internal/domain/exgaccount"
 	"stregy/internal/domain/user"
 	"stregy/pkg/handlers"
@@ -17,18 +16,17 @@ import (
 )
 
 const (
-	launchBacktestURL  = "/api/backtest"
-	executeBacktestURL = "/api/execute_backtest"
+	backtestURL = "/api/backtest"
 )
 
 type handler struct {
-	backtesterService backtester.Service
+	backtesterService btservice.Service
 	exgAccService     exgaccount.Service
 	userService       user.Service
 }
 
 func NewHandler(
-	backtesterService backtester.Service,
+	backtesterService btservice.Service,
 	userService user.Service,
 ) api.Handler {
 	return &handler{
@@ -38,15 +36,12 @@ func NewHandler(
 }
 
 func (h *handler) Register(router *httprouter.Router) {
-	createSEHandler := handlers.JsonHandler(h.LaunchBacktestHandler, &BacktesterDTO{})
+	createSEHandler := handlers.JsonHandler(h.backtestHandler, &BacktesterDTO{})
 	userHandler := userapi.AuthenticationHandler(createSEHandler, h.userService)
-	router.POST(launchBacktestURL, handlers.ToSimpleHandler(userHandler))
-
-	userHandler = userapi.AuthenticationHandler(h.RunBacktestHandler, h.userService)
-	router.POST(executeBacktestURL, handlers.ToSimpleHandler(userHandler))
+	router.POST(backtestURL, handlers.ToSimpleHandler(userHandler))
 }
 
-func (h *handler) LaunchBacktestHandler(
+func (h *handler) backtestHandler(
 	w http.ResponseWriter,
 	r *http.Request,
 	params httprouter.Params,
@@ -62,15 +57,12 @@ func (h *handler) LaunchBacktestHandler(
 	// Create db record.
 	startDate, _ := time.Parse("2006-01-02 15:04:05", apiDTO.StartDate)
 	endDate, _ := time.Parse("2006-01-02 15:04:05", apiDTO.EndDate)
-	domainDTO := backtester.BacktestDTO{
-		StrategyName:        apiDTO.StrategyName,
-		Timeframe:           apiDTO.Timeframe,
-		Symbol:              apiDTO.Symbol,
-		StartDate:           startDate,
-		EndDate:             endDate,
-		HighOrderResolution: apiDTO.HighOrderResolution,
-		BarsNeeded:          apiDTO.BarsNeeded,
-		ATRperiod:           apiDTO.ATRperiod,
+	domainDTO := btservice.BacktestDTO{
+		StrategyName: apiDTO.StrategyName,
+		Symbol:       apiDTO.Symbol,
+		TimeframeSec: apiDTO.TimeframeSec,
+		StartDate:    startDate,
+		EndDate:      endDate,
 	}
 	btDomain, err := h.backtesterService.Create(domainDTO)
 	if err != nil {
@@ -78,9 +70,6 @@ func (h *handler) LaunchBacktestHandler(
 		handlers.ReturnError(w, http.StatusInternalServerError, "")
 		return
 	}
-	// set fields not saved to db
-	btDomain.BarsNeeded = apiDTO.BarsNeeded
-	btDomain.ATRperiod = apiDTO.ATRperiod
 
 	// Execute.
 	err = h.backtesterService.Launch(btDomain)
@@ -91,14 +80,4 @@ func (h *handler) LaunchBacktestHandler(
 	}
 
 	handlers.JsonResponseWriter(w, map[string]string{"backtest_id": btDomain.Id})
-}
-
-func (h *handler) RunBacktestHandler(
-	w http.ResponseWriter,
-	r *http.Request,
-	params httprouter.Params,
-	args map[string]interface{},
-) {
-	h.backtesterService.Run()
-	os.Exit(0)
 }

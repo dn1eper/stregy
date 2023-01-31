@@ -2,10 +2,12 @@ package quote
 
 import (
 	"fmt"
+	"sort"
 	"stregy/internal/domain/quote"
 	"stregy/pkg/utils"
 	"strings"
 	"time"
+	"unsafe"
 
 	"gorm.io/gorm"
 )
@@ -18,26 +20,29 @@ func NewRepository(client *gorm.DB) quote.Repository {
 	return &repository{db: client}
 }
 
-func (r repository) GetByInterval(symbol string, startTime, endTime time.Time) ([]quote.Quote, error) {
-	tableName := strings.ToLower(symbol) + "_m1_quotes"
+func (r repository) Get(symbol string, startTime, endTime time.Time, limit, timeframeSec int) ([]quote.Quote, error) {
+	tableName := getTableName(symbol, timeframeSec)
 	startTimeStr := utils.FormatTime(startTime)
-	endTimeStr := utils.FormatTime(endTime)
 
 	quotes := make([]Quote, 0)
-	err := r.db.Table(tableName).Where("time >= ? AND time < ?", startTimeStr, endTimeStr).Find(&quotes).Error
+	err := r.db.Table(tableName).Where("time >= ? ORDER BY time LIMIT ?", startTimeStr, limit).Find(&quotes).Error
 	if err != nil {
 		return nil, err
 	}
 
-	quotesDomain := make([]quote.Quote, 0, len(quotes))
-	for _, q := range quotes {
-		quotesDomain = append(quotesDomain, q.ToDomain())
+	res := *(*[]quote.Quote)(unsafe.Pointer(&quotes))
+	if res[len(res)-1].Time.After(endTime) {
+		i := sort.Search(len(res), func(i int) bool {
+			return res[i].Time.After(endTime)
+		})
+		res = res[:i]
 	}
-	return quotesDomain, err
+
+	return res, nil
 }
 
-func (r repository) Load(symbol, filePath, delimiter string, timeframe string) error {
-	tableName := fmt.Sprintf("%v_%v_quotes", strings.ToLower(symbol), timeframe)
+func (r repository) Load(symbol, filePath, delimiter string, timeframeSec int) error {
+	tableName := getTableName(symbol, timeframeSec)
 	return r.db.Exec(fmt.Sprintf(`
 	CREATE UNLOGGED TABLE IF NOT EXISTS temp_quotes (
 		time double precision,
@@ -54,10 +59,21 @@ func (r repository) Load(symbol, filePath, delimiter string, timeframe string) e
 	ALTER time TYPE timestamp without time zone
 		USING (to_timestamp(time) AT TIME ZONE 'UTC');
 	
-	CREATE TABLE %v (LIKE temp_quotes INCLUDING ALL);
+	CREATE TABLE IF NOT EXISTS %v (LIKE quotes INCLUDING ALL);
 
 	INSERT INTO %v SELECT * FROM temp_quotes ON CONFLICT DO NOTHING;
 	 
 	DROP TABLE temp_quotes;`,
 		filePath, delimiter, tableName, tableName)).Error
+}
+
+func getTableName(symbol string, timeframeSec int) string {
+	tableName := strings.ToLower(symbol)
+	if timeframeSec < 60 {
+		tableName += "_s1_quotes"
+	} else {
+		tableName += "_m1_quotes"
+	}
+
+	return tableName
 }

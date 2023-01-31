@@ -49,7 +49,7 @@ func (l *Logger) GetLoggerWithField(k string, v interface{}) Logger {
 	return Logger{l.WithField(k, v)}
 }
 
-func Init() {
+func Init(level logrus.Level) {
 	l := logrus.New()
 	l.SetReportCaller(true)
 	l.Formatter = &logrus.TextFormatter{
@@ -79,7 +79,7 @@ func Init() {
 		})
 	}
 
-	l.SetLevel(logrus.TraceLevel)
+	l.SetLevel(level)
 
 	e = logrus.NewEntry(l)
 }

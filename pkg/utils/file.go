@@ -6,7 +6,7 @@ import (
 )
 
 func ReplaceFirstLineInFile(file, line, newline string) error {
-	f, err := os.Open(file)
+	f, err := os.OpenFile(file, os.O_RDWR, 0666)
 	if err != nil {
 		return err
 	}
@@ -21,8 +21,9 @@ func ReplaceFirstLineInFile(file, line, newline string) error {
 		bytes = append(bytes, []byte(str)...)
 		bytes = append(bytes, []byte("\n")...)
 	}
-	f.Write(bytes)
 	f.Close()
+
+	os.WriteFile(file, bytes, 0666)
 
 	return nil
 }

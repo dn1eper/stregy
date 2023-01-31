@@ -32,7 +32,6 @@ var once sync.Once
 func GetConfig() *Config {
 	once.Do(func() {
 		logger := logging.GetLogger()
-		logger.Info("read application configuration")
 		instance = &Config{}
 		if err := cleanenv.ReadConfig("config.yaml", instance); err != nil {
 			help, _ := cleanenv.GetDescription(instance, nil)

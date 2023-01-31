@@ -6,36 +6,34 @@ import (
 )
 
 type Service interface {
-	Get(symbol string, start, end time.Time, timeframe int) chan Quote
-	Load(symbol, filePath, delimiter string, timeframe string) error
+	Get(symbol string, start, end time.Time, timeframeSec int) (<-chan Quote, Quote)
+	Load(symbol, filePath, delimiter string, timeframeSec int) error
 }
 
 type service struct {
 	repository Repository
+
+	queryRowsLimit int
 }
 
 func NewService(repository Repository) Service {
-	return &service{repository: repository}
+	return &service{repository: repository, queryRowsLimit: 262144}
 }
 
-func (s *service) Get(symbol string, start, end time.Time, timeframeSec int) chan Quote {
-	ch := make(chan Quote, 256)
+func (s *service) Get(symbol string, start, end time.Time, timeframeSec int) (<-chan Quote, Quote) {
+	ch := make(chan Quote, s.queryRowsLimit)
 	go quoteGenerator(ch, s, symbol, start, end, timeframeSec)
-	return ch
+	return ch, s.firstQuote(symbol, start, end, timeframeSec)
 }
 
 func quoteGenerator(ch chan<- Quote, s *service, symbol string, start, end time.Time, timeframeSec int) error {
 	batchStart := start
-	batchEnd := batchStart.AddDate(0, 0, 1)
-	if batchEnd.After(end) {
-		batchEnd = end
-	}
-	if 86400%timeframeSec != 0 {
-		return fmt.Errorf("one day is not a multiple of requested timeframe")
+	if err := CheckIsValidTimeframe(timeframeSec); err != nil {
+		return err
 	}
 
-	for {
-		quotes, err := s.repository.GetByInterval(symbol, batchStart, batchEnd)
+	for batchStart.Before(end) {
+		quotes, err := s.repository.Get(symbol, batchStart, end, s.queryRowsLimit, timeframeSec)
 		if err != nil {
 			return err
 		}
@@ -52,17 +50,22 @@ func quoteGenerator(ch chan<- Quote, s *service, symbol string, start, end time.
 			ch <- quote
 		}
 
-		batchStart = batchEnd
-		batchEnd = batchStart.AddDate(0, 0, 1)
-		if batchEnd.After(end) {
-			batchEnd = end
-		}
+		batchStart = quotes[len(quotes)-1].Time.Add(time.Millisecond * 1)
 	}
 	close(ch)
 
 	return nil
 }
 
-func (s *service) Load(symbol, filePath, delimiter string, timeframe string) error {
-	return s.repository.Load(symbol, filePath, delimiter, timeframe)
+func (s *service) Load(symbol, filePath, delimiter string, timeframeSec int) error {
+	return s.repository.Load(symbol, filePath, delimiter, timeframeSec)
+}
+
+func (s *service) firstQuote(symbol string, start, end time.Time, timeframeSec int) Quote {
+	quotes, _ := s.repository.Get(symbol, start, end, 1, timeframeSec)
+	if len(quotes) == 0 {
+		return Quote{}
+	}
+
+	return quotes[0]
 }

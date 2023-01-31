@@ -2,9 +2,9 @@ package composites
 
 import (
 	"stregy/internal/adapters/api"
-	backtester1 "stregy/internal/adapters/api/backtester"
-	stratexec1 "stregy/internal/adapters/pgorm/stratexec"
-	"stregy/internal/domain/backtester"
+	btapi "stregy/internal/adapters/api/bt"
+	"stregy/internal/adapters/pgorm/stratexec"
+	"stregy/internal/domain/btservice"
 	"stregy/internal/domain/exgaccount"
 	"stregy/internal/domain/position"
 	"stregy/internal/domain/quote"
@@ -14,7 +14,7 @@ import (
 )
 
 type BacktesterComposite struct {
-	Service backtester.Service
+	Service btservice.Service
 	Handler api.Handler
 }
 
@@ -27,9 +27,9 @@ func NewBacktesterComposite(
 	quoteService quote.Service,
 	positionService position.Service,
 ) (*BacktesterComposite, error) {
-	repository := stratexec1.NewRepository(pgormComposite.db)
-	service := backtester.NewService(repository, tickService, quoteService, exgAccService, positionService)
-	handler := backtester1.NewHandler(service, userService)
+	repository := stratexec.NewRepository(pgormComposite.db)
+	service := btservice.NewService(repository, tickService, quoteService, exgAccService, positionService)
+	handler := btapi.NewHandler(service, userService)
 	return &BacktesterComposite{
 		Service: service,
 		Handler: handler,
