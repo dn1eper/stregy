@@ -59,7 +59,7 @@ func (h *handler) backtestHandler(
 	endDate, _ := time.Parse("2006-01-02 15:04:05", apiDTO.EndDate)
 	domainDTO := btservice.BacktestDTO{
 		StrategyName: apiDTO.StrategyName,
-		Symbol:       apiDTO.Symbol,
+		SymbolName:   apiDTO.Symbol,
 		TimeframeSec: apiDTO.TimeframeSec,
 		StartDate:    startDate,
 		EndDate:      endDate,
@@ -79,5 +79,5 @@ func (h *handler) backtestHandler(
 		return
 	}
 
-	handlers.JsonResponseWriter(w, map[string]string{"backtest_id": btDomain.Id})
+	handlers.JsonResponseWriter(w, map[string]string{"backtest_id": btDomain.ID})
 }

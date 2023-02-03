@@ -4,6 +4,7 @@ import (
 	"database/sql/driver"
 	"stregy/internal/adapters/pgorm/exgaccount"
 	"stregy/internal/domain/bt"
+	"stregy/internal/domain/symbol"
 	"time"
 
 	"github.com/google/uuid"
@@ -26,7 +27,7 @@ type StrategyExecution struct {
 	ExchangeAccount     exgaccount.ExchangeAccount
 	ExchangeAccountID   *uuid.UUID
 	TimeframeSec        int                     `gorm:"type:int;not null;check:timeframe_sec > 0"`
-	Symbol              string                  `gorm:"not null"`
+	SymbolName          string                  `gorm:"not null"`
 	StartTime           time.Time               `gorm:"type:timestamp;not null"`
 	EndTime             time.Time               `gorm:"type:timestamp"`
 	Status              StrategyExecutionStatus `gorm:"type:strategy_execution_status;not null"`
@@ -34,11 +35,11 @@ type StrategyExecution struct {
 
 func (s *StrategyExecution) ToBacktest() *bt.Backtest {
 	return &bt.Backtest{
-		Id:           s.StrategyExecutionId.String(),
+		ID:           s.StrategyExecutionId.String(),
 		StrategyName: s.StrategyName,
 		StartTime:    s.StartTime,
 		EndTime:      s.EndTime,
-		Symbol:       s.Symbol,
+		Symbol:       symbol.Symbol{Name: s.SymbolName},
 		TimeframeSec: s.TimeframeSec,
 		Status:       bt.StrategyExecutionStatus(string(s.Status)),
 	}

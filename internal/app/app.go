@@ -72,27 +72,21 @@ func Run(cfg *config.Config) {
 		logger.Fatal("exchange account composite failed")
 	}
 
-	_, err = composites.NewSymbolComposite(pgormComposite)
+	symbolComposite, err := composites.NewSymbolComposite(pgormComposite)
 	if err != nil {
 		logger.Fatal("symbol composite failed")
 	}
 
-	orderComposite, err := composites.NewOrderComposite()
+	_, err = composites.NewOrderComposite()
 	if err != nil {
 		logger.Fatal("order composite failed")
-	}
-
-	positionComposite, err := composites.NewPositionComposite(pgormComposite, orderComposite.Service)
-	if err != nil {
-		logger.Fatal("position composite failed")
 	}
 
 	backtesterComposite, err := composites.NewBacktesterComposite(
 		pgormComposite, exgAccountComposite.Service,
 		strategyComposite.Service, userComposite.Service,
 		tickComposite.Service, quoteComposite.Service,
-		positionComposite.Service,
-	)
+		symbolComposite.Service)
 	if err != nil {
 		logger.Fatal("backtester composite failed")
 	}

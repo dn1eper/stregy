@@ -1,9 +1,7 @@
 package symbol
 
 import (
-	"fmt"
 	"stregy/internal/domain/symbol"
-	"strings"
 
 	"gorm.io/gorm"
 )
@@ -16,33 +14,20 @@ func NewRepository(client *gorm.DB) symbol.Repository {
 	return &repository{db: client}
 }
 
-func (r *repository) Exists(name string) bool {
-	symbol := &Symbol{Name: name}
-	result := r.db.First(symbol)
-	if result.Error != nil {
-		return false
+func (r *repository) Create(s symbol.Symbol) (*symbol.Symbol, error) {
+	sDb := Symbol(s)
+	if err := r.db.Create(&sDb).Error; err != nil {
+		return nil, err
 	}
-	return true
+
+	return sDb.ToDomain(), nil
 }
 
-func (r *repository) Create(name string) (*symbol.Symbol, error) {
+func (r *repository) GetByName(name string) (*symbol.Symbol, error) {
 	symbol := &Symbol{Name: name}
-	result := r.db.Create(symbol)
-	if result.Error != nil {
-		return nil, result.Error
+	if err := r.db.First(symbol).Error; err != nil {
+		return nil, err
 	}
-	tableName := strings.ToLower(name)
-	r.db.Exec(fmt.Sprintf("CREATE TABLE %vs (LIKE quotes INCLUDING ALL);", tableName))
-	symbolDomain := symbol.ToDomain()
-	return &symbolDomain, result.Error
-}
 
-func (r *repository) GetAll() ([]symbol.Symbol, error) {
-	symbols := make([]Symbol, 0)
-	result := r.db.Find(&symbols)
-	symbolsDomain := make([]symbol.Symbol, 0, len(symbols))
-	for _, symbol := range symbols {
-		symbolsDomain = append(symbolsDomain, symbol.ToDomain())
-	}
-	return symbolsDomain, result.Error
+	return symbol.ToDomain(), nil
 }

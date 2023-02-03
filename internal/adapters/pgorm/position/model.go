@@ -1,36 +1,18 @@
 package position
 
 import (
-	"database/sql/driver"
 	"stregy/internal/adapters/pgorm/order"
+
+	"github.com/google/uuid"
 )
 
 type Position struct {
-	PositionID  uint64 `gorm:"primaryKey"`
+	ID          uuid.UUID `gorm:"primaryKey;type:uuid;default:uuid_generate_v4()"`
+	Num         int64     `gorm:"type:integer"`
 	MainOrder   order.Order
 	StopOrder   order.Order
 	TakeOrder   order.Order
-	MainOrderID uint64
-	StopOrderID uint64
-	TakeOrderID uint64
-	Status      PositionStatus `gorm:"type:position_status;not null"`
-}
-
-type PositionStatus string
-
-const (
-	Created    PositionStatus = "CreatedPosition"
-	Open       PositionStatus = "OpenPosition"
-	TakeProfit PositionStatus = "TakeProfitPosition"
-	StopLoss   PositionStatus = "StopLossPosition"
-	Cancelled  PositionStatus = "CancelledPosition"
-)
-
-func (ps *PositionStatus) Scan(value interface{}) error {
-	*ps = PositionStatus(value.([]byte))
-	return nil
-}
-
-func (ps PositionStatus) Value() (driver.Value, error) {
-	return string(ps), nil
+	MainOrderId uuid.UUID
+	StopOrderId uuid.UUID
+	TakeOrderId uuid.UUID
 }

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"stregy/internal/domain/order"
 )
 
 type Logger interface {
@@ -15,7 +16,19 @@ type logger struct {
 	file *os.File
 }
 
+type LoggingConfig struct {
+	LogOrderStatusChange bool
+	PricePrecision       int
+}
+
 var loggerInstance logger
+var loggingConfig LoggingConfig
+
+func logOrderStatusChange(o *order.Order) {
+	if loggingConfig.LogOrderStatusChange {
+		PrintOrderStatus(o)
+	}
+}
 
 func InitLogger(name string) {
 	wd, _ := os.Getwd()

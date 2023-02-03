@@ -5,9 +5,11 @@ import (
 )
 
 type Symbol struct {
-	Name string `gorm:"primaryKey;type:string;"`
+	Name      string `gorm:"primaryKey;type:string"`
+	Precision int    `gorm:"type:int"`
 }
 
-func (s Symbol) ToDomain() symbol.Symbol {
-	return symbol.Symbol{Name: s.Name}
+func (s *Symbol) ToDomain() *symbol.Symbol {
+	res := symbol.Symbol(*s)
+	return &res
 }

@@ -2,7 +2,6 @@ package defaultstrat
 
 import (
 	"stregy/internal/domain/order"
-	"stregy/internal/domain/position"
 	"stregy/internal/domain/quote"
 	"stregy/internal/domain/strategy"
 	"time"
@@ -19,13 +18,10 @@ func (s *Strategy) Name() string {
 	return "defaultstrat"
 }
 
-func (s *Strategy) OnOrder(order order.Order) {
+func (s *Strategy) OnOrder(o order.Order) {
 }
 
-func (s *Strategy) OnPosition(position position.Position) {
-}
-
-func (s *Strategy) OnQuote(quote quote.Quote, timeframe int) {
+func (s *Strategy) OnQuote(q quote.Quote, timeframe int) {
 }
 
 func (s *Strategy) PrimaryTimeframeSec() int {

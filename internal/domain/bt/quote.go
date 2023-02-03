@@ -8,6 +8,7 @@ import (
 )
 
 var Time time.Time
+var Price float64
 
 type quoteFeed struct {
 	open              float64

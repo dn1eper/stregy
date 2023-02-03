@@ -19,7 +19,7 @@ func (r *repository) Create(backtest bt.Backtest) (*bt.Backtest, error) {
 	se := &StrategyExecution{
 		StrategyName: backtest.StrategyName,
 		TimeframeSec: backtest.TimeframeSec,
-		Symbol:       backtest.Symbol,
+		SymbolName:   backtest.Symbol.Name,
 		StartTime:    backtest.StartTime,
 		EndTime:      backtest.EndTime,
 		Status:       StrategyExecutionStatus(backtest.Status),
@@ -29,7 +29,7 @@ func (r *repository) Create(backtest bt.Backtest) (*bt.Backtest, error) {
 		return nil, result.Error
 	}
 
-	backtest.Id = se.StrategyExecutionId.String()
+	backtest.ID = se.StrategyExecutionId.String()
 	return &backtest, nil
 }
 

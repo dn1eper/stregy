@@ -9,14 +9,16 @@ import (
 )
 
 type Order struct {
-	OrderID             uuid.UUID `gorm:"primaryKey;type:uuid;default:uuid_generate_v4()"`
+	OrderId             uuid.UUID `gorm:"primaryKey;type:uuid;default:uuid_generate_v4()"`
+	Num                 int64     `gorm:"type:integer"`
 	StrategyExecution   stratexec.StrategyExecution
 	StrategyExecutionID uuid.UUID
 	Price               float64        `gorm:"double precision;not null"`
 	Direction           OrderDirection `gorm:"type:order_direction"`
 	Size                float64        `gorm:"double precision;not null"`
 	Type                OrderType      `gorm:"type:order_type;not null"`
-	ExecutionTime       time.Time      `gorm:"type:timestamp"`
+	ECTime              time.Time      `gorm:"type:timestamp"`
+	SubmissionTime      time.Time      `gorm:"type:timestamp"`
 	ExecutionPrice      float64        `gorm:"double precision"`
 	Status              OrderStatus    `gorm:"type:order_status;not null"`
 }

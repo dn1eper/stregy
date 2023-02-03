@@ -58,9 +58,9 @@ func (r *repository) GetAll(userID string) ([]*exgaccount.ExchangeAccount, error
 func (r *repository) GetOne(exgAccountID string) (*exgaccount.ExchangeAccount, error) {
 	uuid, _ := uuid.Parse(exgAccountID)
 	exgAccount := ExchangeAccount{ExchangeAccountID: uuid}
-	err := r.db.First(&exgAccount).Error
-	if err != nil {
+	if err := r.db.First(&exgAccount).Error; err != nil {
 		return nil, err
 	}
+
 	return exgAccount.ToDomain(), nil
 }

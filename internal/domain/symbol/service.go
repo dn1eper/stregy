@@ -1,9 +1,8 @@
 package symbol
 
 type Service interface {
-	Exists(name string) bool
-	Create(name string) (*Symbol, error)
-	GetAll() ([]Symbol, error)
+	Create(symbol Symbol) (*Symbol, error)
+	GetByName(name string) (*Symbol, error)
 }
 
 type service struct {
@@ -14,13 +13,10 @@ func NewService(repository Repository) Service {
 	return &service{repository: repository}
 }
 
-func (s *service) Exists(name string) bool {
-	return s.repository.Exists(name)
-}
-func (s *service) Create(name string) (*Symbol, error) {
-	return s.repository.Create(name)
+func (s *service) Create(symbol Symbol) (*Symbol, error) {
+	return s.repository.Create(symbol)
 }
 
-func (s *service) GetAll() ([]Symbol, error) {
-	return s.repository.GetAll()
+func (s *service) GetByName(name string) (*Symbol, error) {
+	return s.repository.GetByName(name)
 }

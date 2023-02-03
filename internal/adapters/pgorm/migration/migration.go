@@ -17,7 +17,7 @@ import (
 func createDatatypes(db *gorm.DB) error {
 	return db.Exec(`DO $$ BEGIN CREATE TYPE order_type AS ENUM('LimitOrder', 'MarketOrder', 'StopLimitOrder', 'StopMarketOrder', 'TrailingStopOrder'); EXCEPTION WHEN duplicate_object THEN null; END $$;
 		DO $$ BEGIN CREATE TYPE order_status AS ENUM('SubmittedOrder', 'AcceptedOrder', 'PartialOrder', 'CompletedOrder', 'CancelledOrder', 'ExpiredOrder', 'MarginOrder'); EXCEPTION WHEN duplicate_object THEN null; END $$;
-		DO $$ BEGIN CREATE TYPE position_status AS ENUM('CreatedPosition', 'OpenPosition', 'TakeProfitPosition', 'StopLossPosition', 'CancelledPosition'); EXCEPTION WHEN duplicate_object THEN null; END $$;
+		DO $$ BEGIN CREATE TYPE position_status AS ENUM('CreatedPosition', 'PartialPosition', 'OpenPosition', 'TakeProfitPosition', 'StopLossPosition', 'CancelledPosition'); EXCEPTION WHEN duplicate_object THEN null; END $$;
 		DO $$ BEGIN CREATE TYPE order_direction AS ENUM('Long', 'Short'); EXCEPTION WHEN duplicate_object THEN null; END $$;
 		DO $$ BEGIN CREATE TYPE strategy_execution_status AS ENUM('Created', 'Running', 'Finished', 'Crashed'); EXCEPTION WHEN duplicate_object THEN null; END $$;`,
 	).Error

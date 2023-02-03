@@ -1,10 +1,13 @@
 ## today
-create seperate logger for strategy
-consider dispatching quotes as references
-test quotes generator
+make balance available
+create new name for order and position module, change pgorm adapter as well
+merge bt and bt service?
 
 ## future
-if I will need previous quotes implement them with circular buffers
+send logging config when creating backtest
+test quotes generator
+add ability to add sl tp after submitting order
+delete submitted status in order?
 use int64 instead of float64 for price?
 Partial position?
 Transaction approach in all financial operations

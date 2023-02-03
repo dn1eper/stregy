@@ -8,9 +8,9 @@ import (
 	"path"
 	"stregy/internal/domain/bt"
 	"stregy/internal/domain/exgaccount"
-	"stregy/internal/domain/position"
 	"stregy/internal/domain/quote"
 	strategy1 "stregy/internal/domain/strategy"
+	"stregy/internal/domain/symbol"
 	"stregy/internal/domain/tick"
 	strategy "stregy/local/strategies/strat1"
 	"stregy/pkg/logging"
@@ -24,15 +24,14 @@ type Service interface {
 }
 
 type service struct {
-	repository      Repository
-	tickService     tick.Service
-	quoteService    quote.Service
-	exgAccService   exgaccount.Service
-	positionService position.Service
+	repository        Repository
+	tickService       tick.Service
+	quoteService      quote.Service
+	exgAccService     exgaccount.Service
+	symbolService     symbol.Service
+	accHistoryService bt.AccountHistoryReport
 
 	stratexecProjectPath string
-
-	positions []*position.Position
 }
 
 func NewService(
@@ -40,14 +39,16 @@ func NewService(
 	tickService tick.Service,
 	quoteService quote.Service,
 	exgAccService exgaccount.Service,
-	positionService position.Service,
+	symbolService symbol.Service,
+	accHistoryService bt.AccountHistoryReport,
 ) Service {
 	return &service{
-		repository:      repository,
-		tickService:     tickService,
-		quoteService:    quoteService,
-		exgAccService:   exgAccService,
-		positionService: positionService,
+		repository:        repository,
+		tickService:       tickService,
+		quoteService:      quoteService,
+		exgAccService:     exgAccService,
+		symbolService:     symbolService,
+		accHistoryService: accHistoryService,
 	}
 }
 
@@ -56,7 +57,7 @@ func (s *service) Create(dto BacktestDTO) (*bt.Backtest, error) {
 		StrategyName: dto.StrategyName,
 		StartTime:    dto.StartDate,
 		EndTime:      dto.EndDate,
-		Symbol:       dto.Symbol,
+		Symbol:       symbol.Symbol{Name: dto.SymbolName},
 		TimeframeSec: dto.TimeframeSec,
 		Status:       bt.Created,
 	}
@@ -82,7 +83,7 @@ func (s *service) Launch(backtest *bt.Backtest) (err error) {
 
 	// run
 	go func() {
-		executableName := fmt.Sprintf("%s.exe", backtest.Id)
+		executableName := fmt.Sprintf("%s.exe", backtest.ID)
 		cmd := exec.Command("go", "build", "-o", executableName, "cmd/main.go")
 		err = cmd.Run()
 		utils.ReplaceFirstLineInFile(filePath, newImportLine, importLine)
@@ -92,7 +93,7 @@ func (s *service) Launch(backtest *bt.Backtest) (err error) {
 		}
 
 		executablePath := fmt.Sprintf("%s\\%s", wd, executableName)
-		cmd = exec.Command(executablePath, "--backtest", backtest.Id)
+		cmd = exec.Command(executablePath, "--backtest", backtest.ID)
 		defer func() {
 			os.Remove(executablePath)
 		}()
@@ -121,13 +122,24 @@ func (s *service) Run() (err error) {
 	if err != nil {
 		return err
 	}
+	backtest.AccountHistoryService = s.accHistoryService
+	backtest.Symbol = *s.getSymbol(backtest.Symbol.Name)
 
 	var strat strategy1.Strategy = strategy.NewStrategy()
 
 	// backtest
 	serviceLogger.Info(fmt.Sprintf("running backtest with strategy %v on period [%s; %s]", strat.Name(), backtest.StartTime.Format("2006-01-02 15:04:05"), backtest.EndTime.Format("2006-01-02 15:04:05")))
-	quotes, firstQuote := s.quoteService.Get(backtest.Symbol, backtest.StartTime, backtest.EndTime, backtest.TimeframeSec)
-	bt.RunOnQuotes(backtest, strat, quotes, firstQuote)
+	quotes, firstQuote := s.quoteService.Get(backtest.Symbol.Name, backtest.StartTime, backtest.EndTime, backtest.TimeframeSec)
+	backtest.RunOnQuotes(strat, quotes, firstQuote)
 
 	return err
+}
+
+func (s *service) getSymbol(name string) *symbol.Symbol {
+	smbl, _ := s.symbolService.GetByName(name)
+	if s == nil {
+		smbl = &symbol.Symbol{Name: name, Precision: 6}
+	}
+
+	return smbl
 }

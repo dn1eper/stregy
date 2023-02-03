@@ -1,14 +1,15 @@
 package composites
 
 import (
+	acchistory "stregy/internal/adapters/acchistory/general"
 	"stregy/internal/adapters/api"
 	btapi "stregy/internal/adapters/api/bt"
 	"stregy/internal/adapters/pgorm/stratexec"
 	"stregy/internal/domain/btservice"
 	"stregy/internal/domain/exgaccount"
-	"stregy/internal/domain/position"
 	"stregy/internal/domain/quote"
 	"stregy/internal/domain/strategy"
+	"stregy/internal/domain/symbol"
 	"stregy/internal/domain/tick"
 	"stregy/internal/domain/user"
 )
@@ -25,10 +26,16 @@ func NewBacktesterComposite(
 	userService user.Service,
 	tickService tick.Service,
 	quoteService quote.Service,
-	positionService position.Service,
+	symbolService symbol.Service,
 ) (*BacktesterComposite, error) {
 	repository := stratexec.NewRepository(pgormComposite.db)
-	service := btservice.NewService(repository, tickService, quoteService, exgAccService, positionService)
+	service := btservice.NewService(
+		repository,
+		tickService,
+		quoteService,
+		exgAccService,
+		symbolService,
+		acchistory.NewAccountHistoryReporter())
 	handler := btapi.NewHandler(service, userService)
 	return &BacktesterComposite{
 		Service: service,

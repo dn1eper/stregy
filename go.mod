@@ -5,6 +5,11 @@ go 1.17
 require gorm.io/driver/postgres v1.3.1
 
 require (
+	golang.org/x/mod v0.7.0 // indirect
+	golang.org/x/tools v0.5.0 // indirect
+)
+
+require (
 	github.com/onsi/ginkgo v1.16.5 // indirect
 	github.com/onsi/gomega v1.26.0 // indirect
 	github.com/otiai10/copy v1.9.0

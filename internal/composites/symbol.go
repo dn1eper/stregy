@@ -6,13 +6,13 @@ import (
 )
 
 type SymbolComposite struct {
-	Repository symbol.Repository
+	Service symbol.Service
 }
 
 func NewSymbolComposite(composite *PGormComposite) (*SymbolComposite, error) {
 	repository := symbol1.NewRepository(composite.db)
 
 	return &SymbolComposite{
-		Repository: repository,
+		Service: symbol.NewService(repository),
 	}, nil
 }

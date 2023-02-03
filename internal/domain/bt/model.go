@@ -1,6 +1,7 @@
 package bt
 
 import (
+	"stregy/internal/domain/symbol"
 	"time"
 )
 
@@ -14,11 +15,12 @@ const (
 )
 
 type Backtest struct {
-	Id           string
-	StrategyName string
-	StartTime    time.Time
-	EndTime      time.Time
-	Symbol       string
-	TimeframeSec int
-	Status       StrategyExecutionStatus
+	ID                    string
+	StrategyName          string
+	StartTime             time.Time
+	EndTime               time.Time
+	Symbol                symbol.Symbol
+	TimeframeSec          int
+	Status                StrategyExecutionStatus
+	AccountHistoryService AccountHistoryReport
 }

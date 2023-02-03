@@ -3,7 +3,6 @@ package strat1
 import (
 	"stregy/internal/domain/bt"
 	"stregy/internal/domain/order"
-	"stregy/internal/domain/position"
 	"stregy/internal/domain/quote"
 	"stregy/internal/domain/strategy"
 	"stregy/pkg/logging"
@@ -11,6 +10,8 @@ import (
 )
 
 var logger logging.Logger
+
+var prevClose float64
 
 type Strategy struct {
 }
@@ -25,14 +26,20 @@ func (s *Strategy) Name() string {
 	return "strat1"
 }
 
-func (s *Strategy) OnOrder(order order.Order) {
+func (s *Strategy) OnOrder(o order.Order) {
+	bt.PrintOrder(&o)
 }
 
-func (s *Strategy) OnPosition(position position.Position) {
-}
-
-func (s *Strategy) OnQuote(quote quote.Quote, timeframe int) {
-	bt.Printf("timeframe = %dm: %v", timeframe, quote)
+func (s *Strategy) OnQuote(q quote.Quote, timeframe int) {
+	// bt.Printf("timeframe = %dm: %v", timeframe, quote)
+	if prevClose == 0 {
+		prevClose = q.Close
+	} else if q.Close > prevClose {
+		bt.SubmitContingentOrders(q.Close, 1, order.Long, order.Market, 100, 100)
+	} else if q.Close < prevClose {
+		bt.SubmitContingentOrders(q.Close, 1, order.Short, order.Market, 100, 100)
+	}
+	prevClose = q.Close
 }
 
 func (s *Strategy) PrimaryTimeframeSec() int {
@@ -44,7 +51,7 @@ func (s *Strategy) QuoteTimeframesNeeded() []int {
 }
 
 func (s *Strategy) TimeBeforeCallbacks() time.Duration {
-	return time.Minute * 5 * 40
+	return time.Minute * 0
 }
 
 var _ strategy.Strategy = (*Strategy)(nil)
