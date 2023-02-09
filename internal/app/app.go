@@ -82,20 +82,20 @@ func Run(cfg *config.Config) {
 		logger.Fatal("order composite failed")
 	}
 
-	backtesterComposite, err := composites.NewBacktesterComposite(
+	backtestComposite, err := composites.NewBacktestComposite(
 		pgormComposite, exgAccountComposite.Service,
 		strategyComposite.Service, userComposite.Service,
 		tickComposite.Service, quoteComposite.Service,
 		symbolComposite.Service)
 	if err != nil {
-		logger.Fatal("backtester composite failed")
+		logger.Fatal("backtest composite failed")
 	}
 
 	switch appMode {
 	case Server:
-		StartServer(userComposite, strategyComposite, exgAccountComposite, backtesterComposite)
+		StartServer(userComposite, strategyComposite, exgAccountComposite, backtestComposite)
 	case Backtest:
-		err = backtesterComposite.Service.Run()
+		err = backtestComposite.Service.Run()
 		if err != nil {
 			logger.Fatal(err.Error())
 		}
@@ -110,7 +110,7 @@ func StartServer(
 	userComposite *composites.UserComposite,
 	strategyComposite *composites.StrategyComposite,
 	exgAccountComposite *composites.ExchangeAccountComposite,
-	backtesterComposite *composites.BacktesterComposite) {
+	backtestComposite *composites.BacktestComposite) {
 	logger := logging.GetLogger()
 
 	router := httprouter.New()
@@ -118,7 +118,7 @@ func StartServer(
 	userComposite.Handler.Register(router)
 	strategyComposite.Handler.Register(router)
 	exgAccountComposite.Handler.Register(router)
-	backtesterComposite.Handler.Register(router)
+	backtestComposite.Handler.Register(router)
 
 	cfg := config.GetConfig()
 	listener, err := net.Listen("tcp", fmt.Sprintf("%v:%v", cfg.Listen.BindIP, cfg.Listen.Port))

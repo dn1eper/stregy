@@ -6,7 +6,7 @@ import (
 )
 
 func (pm *positionMerger) checkIsValidPosition(p *order.Position) error {
-	if p.Status() != order.Open {
+	if p.Status() != order.OpenPosition {
 		return fmt.Errorf("cannot merge position that is not open")
 	}
 

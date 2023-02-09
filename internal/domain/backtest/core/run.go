@@ -1,4 +1,4 @@
-package bt
+package core
 
 import (
 	"fmt"
@@ -11,14 +11,14 @@ import (
 	"time"
 )
 
-func (b *Backtester) Time() time.Time {
+func (b *Backtest) Time() time.Time {
 	return b.curTime
 }
-func (b *Backtester) Price() float64 {
+func (b *Backtest) Price() float64 {
 	return b.lastPrice
 }
 
-func (b *Backtester) BacktestOnQuotes(s strategy1.Strategy, quotes <-chan quote.Quote, firstQuote quote.Quote) error {
+func (b *Backtest) BacktestOnQuotes(s strategy1.Strategy, quotes <-chan quote.Quote, firstQuote quote.Quote) error {
 	b.init(s)
 	b.curTime = firstQuote.Time
 	b.lastPrice = firstQuote.Open
@@ -33,7 +33,7 @@ func (b *Backtester) BacktestOnQuotes(s strategy1.Strategy, quotes <-chan quote.
 	return nil
 }
 
-func (b *Backtester) CreateReport(location string) {
+func (b *Backtest) CreateReport(location string) {
 	reportPath := ""
 	if location == "" {
 		reportPath = b.getDefaultReportPath()
@@ -47,7 +47,7 @@ func (b *Backtester) CreateReport(location string) {
 	}
 }
 
-func (b *Backtester) init(s strategy1.Strategy) {
+func (b *Backtest) init(s strategy1.Strategy) {
 	b.initLogger()
 
 	b.strategy = s
@@ -56,12 +56,12 @@ func (b *Backtester) init(s strategy1.Strategy) {
 	b.termChan = make(chan bool)
 }
 
-func (b *Backtester) initLogger() {
+func (b *Backtest) initLogger() {
 	loggerCfg := broker.LoggingConfig{LogOrderStatusChange: false, PricePrecision: b.Symbol.Precision}
 	b.logger = *broker.NewLogger(b.ID+".log", loggerCfg, b)
 }
 
-func (b *Backtester) runOnQuotes(quotes <-chan quote.Quote, quoteGen *quoteGenerator) {
+func (b *Backtest) runOnQuotes(quotes <-chan quote.Quote, quoteGen *quoteGenerator) {
 	run := true
 	for run {
 		select {
@@ -108,7 +108,7 @@ func (b *Backtester) runOnQuotes(quotes <-chan quote.Quote, quoteGen *quoteGener
 	}
 }
 
-func (b *Backtester) Terminate() {
+func (b *Backtest) Terminate() {
 	b.Status = Terminated
 	b.termChan <- true
 	b.logger.Print("Terminated")

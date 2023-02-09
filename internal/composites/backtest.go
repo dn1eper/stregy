@@ -5,7 +5,7 @@ import (
 	"stregy/internal/adapters/api"
 	btapi "stregy/internal/adapters/api/bt"
 	"stregy/internal/adapters/pgorm/stratexec"
-	"stregy/internal/domain/btservice"
+	"stregy/internal/domain/backtest"
 	"stregy/internal/domain/exgaccount"
 	"stregy/internal/domain/quote"
 	"stregy/internal/domain/strategy"
@@ -14,12 +14,12 @@ import (
 	"stregy/internal/domain/user"
 )
 
-type BacktesterComposite struct {
-	Service btservice.Service
+type BacktestComposite struct {
+	Service backtest.Service
 	Handler api.Handler
 }
 
-func NewBacktesterComposite(
+func NewBacktestComposite(
 	pgormComposite *PGormComposite,
 	exgAccService exgaccount.Service,
 	strategyService strategy.Service,
@@ -27,9 +27,9 @@ func NewBacktesterComposite(
 	tickService tick.Service,
 	quoteService quote.Service,
 	symbolService symbol.Service,
-) (*BacktesterComposite, error) {
+) (*BacktestComposite, error) {
 	repository := stratexec.NewRepository(pgormComposite.db)
-	service := btservice.NewService(
+	service := backtest.NewService(
 		repository,
 		tickService,
 		quoteService,
@@ -37,7 +37,7 @@ func NewBacktesterComposite(
 		symbolService,
 		acchistory.NewAccountHistoryReporter())
 	handler := btapi.NewHandler(service, userService)
-	return &BacktesterComposite{
+	return &BacktestComposite{
 		Service: service,
 		Handler: handler,
 	}, nil

@@ -1,10 +1,10 @@
-package bt
+package core
 
 import (
 	"stregy/internal/domain/order"
 )
 
-func (b *Backtester) CancelOrder(id int64) error {
+func (b *Backtest) CancelOrder(id int64) error {
 	o, ok := b.orders[id]
 	if !ok {
 		return &OrderNotFoundError{id}
@@ -24,7 +24,7 @@ func (b *Backtester) CancelOrder(id int64) error {
 	return nil
 }
 
-func (b *Backtester) cancelContingentOrders(o *order.Order) {
+func (b *Backtest) cancelContingentOrders(o *order.Order) {
 	for _, oCtg := range o.Position.CtgOrders {
 		b.CancelOrder(oCtg.ID)
 	}

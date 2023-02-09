@@ -1,4 +1,4 @@
-package bt
+package core
 
 import (
 	"stregy/internal/domain/broker"
@@ -18,7 +18,7 @@ const (
 	Crashed    StrategyExecutionStatus = "Crashed"
 )
 
-type Backtester struct {
+type Backtest struct {
 	ID                    string
 	StrategyName          string
 	StartTime             time.Time
@@ -45,4 +45,4 @@ type Backtester struct {
 	orderHistory  []*order.Order
 }
 
-var _ broker.Broker = (*Backtester)(nil)
+var _ broker.Broker = (*Backtest)(nil)

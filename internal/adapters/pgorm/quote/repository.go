@@ -23,9 +23,10 @@ func NewRepository(client *gorm.DB) quote.Repository {
 func (r repository) Get(symbol string, startTime, endTime time.Time, limit, timeframeSec int) ([]quote.Quote, error) {
 	tableName := getTableName(symbol, timeframeSec)
 	startTimeStr := utils.FormatTime(startTime)
+	endTimeStr := utils.FormatTime(endTime)
 
 	quotes := make([]Quote, 0)
-	err := r.db.Table(tableName).Where("time >= ? ORDER BY time LIMIT ?", startTimeStr, limit).Find(&quotes).Error
+	err := r.db.Table(tableName).Where("time >= ? AND time <= ? ORDER BY time LIMIT ?", startTimeStr, endTimeStr, limit).Find(&quotes).Error
 	if err != nil {
 		return nil, err
 	}

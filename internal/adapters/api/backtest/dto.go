@@ -1,6 +1,6 @@
 package bt
 
-type BacktesterDTO struct {
+type BacktestDTO struct {
 	StrategyName string `json:"strategy_name"`
 	Symbol       string `json:"symbol"`
 	TimeframeSec int    `json:"timeframe_sec"`

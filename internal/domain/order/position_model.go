@@ -10,19 +10,19 @@ type Position struct {
 type PositionStatus int
 
 const (
-	Draft PositionStatus = iota
-	Open
-	Closed
+	DraftPosition PositionStatus = iota
+	OpenPosition
+	ClosedPosition
 )
 
 func (p *Position) Status() PositionStatus {
-	if p.MainOrder.Status != Filled {
-		return Draft
+	if p.MainOrder.Status != FilledOrder {
+		return DraftPosition
 	}
 	if p.Size == 0 {
-		return Closed
+		return ClosedPosition
 	}
-	return Open
+	return OpenPosition
 }
 
 func (p *Position) Copy() *Position {

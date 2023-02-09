@@ -20,15 +20,15 @@ type Order struct {
 type OrderStatus int64
 
 const (
-	Inactive OrderStatus = iota
-	Submitted
-	Accepted
-	Partial
-	Filled
+	InactiveOrder OrderStatus = iota
+	SubmittedOrder
+	AcceptedOrder
+	PartialOrder
+	FilledOrder
 	CancelledOrder
-	Rejected
-	Expired
-	Margin
+	RejectedOrder
+	ExpiredOrder
+	MarginCallOrder
 )
 
 type OrderType int64
@@ -71,21 +71,21 @@ func (od OrderDiraction) Opposite() OrderDiraction {
 
 func (s OrderStatus) String() string {
 	switch s {
-	case Inactive:
+	case InactiveOrder:
 		return "Inactive"
-	case Submitted:
+	case SubmittedOrder:
 		return "Submitted"
-	case Accepted:
+	case AcceptedOrder:
 		return "Accepted"
-	case Partial:
+	case PartialOrder:
 		return "Partial"
-	case Filled:
+	case FilledOrder:
 		return "Executed"
 	case CancelledOrder:
 		return "Cancelled"
-	case Expired:
+	case ExpiredOrder:
 		return "Expired"
-	case Margin:
+	case MarginCallOrder:
 		return "Margin"
 	}
 

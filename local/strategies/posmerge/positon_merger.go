@@ -213,7 +213,7 @@ func (pm *positionMerger) OnOrder(o order.Order) {
 	}
 
 	switch o.Status {
-	case order.Filled:
+	case order.FilledOrder:
 		if isSlOrder {
 			mergedPosition.ClosedBySL += o.Size
 			mergedPosition.SlSize -= o.Size

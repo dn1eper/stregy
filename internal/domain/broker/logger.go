@@ -68,7 +68,7 @@ func (l *Logger) LogOrderStatusChange(o *order.Order) {
 
 func (l *Logger) FormatOrder(o *order.Order) string {
 	executionPrice := strconv.FormatFloat(o.ExecutionPrice, 'f', l.config.PricePrecision, 64)
-	if o.Status != order.Filled {
+	if o.Status != order.FilledOrder {
 		executionPrice = ""
 	}
 	price := strconv.FormatFloat(o.Price, 'f', l.config.PricePrecision, 64)

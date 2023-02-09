@@ -3,7 +3,7 @@ package stratexec
 import (
 	"database/sql/driver"
 	"stregy/internal/adapters/pgorm/exgaccount"
-	"stregy/internal/domain/bt"
+	btcore "stregy/internal/domain/backtest/core"
 	"stregy/internal/domain/symbol"
 	"time"
 
@@ -33,14 +33,14 @@ type StrategyExecution struct {
 	Status              StrategyExecutionStatus `gorm:"type:strategy_execution_status;not null"`
 }
 
-func (s *StrategyExecution) ToBacktest() *bt.Backtester {
-	return &bt.Backtester{
+func (s *StrategyExecution) ToBacktest() *btcore.Backtest {
+	return &btcore.Backtest{
 		ID:           s.StrategyExecutionId.String(),
 		StrategyName: s.StrategyName,
 		StartTime:    s.StartTime,
 		EndTime:      s.EndTime,
 		Symbol:       symbol.Symbol{Name: s.SymbolName},
 		TimeframeSec: s.TimeframeSec,
-		Status:       bt.StrategyExecutionStatus(string(s.Status)),
+		Status:       btcore.StrategyExecutionStatus(string(s.Status)),
 	}
 }

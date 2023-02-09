@@ -1,11 +1,11 @@
-package bt
+package core
 
 import (
 	"os"
 	"path"
 )
 
-func (b *Backtester) getDefaultReportPath() string {
+func (b *Backtest) getDefaultReportPath() string {
 	wd, _ := os.Getwd()
 	reportDir := path.Join(wd, "reports")
 	os.Mkdir(reportDir, os.ModePerm)

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
-	"stregy/internal/domain/bt"
+	btcore "stregy/internal/domain/backtest/core"
 	"stregy/internal/domain/order"
 	"stregy/internal/domain/symbol"
 )
@@ -12,7 +12,7 @@ import (
 type accountHistoryReporter struct {
 }
 
-func NewAccountHistoryReporter() bt.AccountHistoryReport {
+func NewAccountHistoryReporter() btcore.AccountHistoryReport {
 	return accountHistoryReporter{}
 }
 

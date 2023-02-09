@@ -28,7 +28,7 @@ func (s *strat1) OnOrder(o order.Order) {
 
 		if o.ID == s.newMainOrder.ID {
 
-			if o.Status == order.Filled {
+			if o.Status == order.FilledOrder {
 				var mergedPosition posmerge.MergedPosition
 				var err error
 				if s.mergedPosition == nil {
@@ -58,11 +58,11 @@ func (s *strat1) OnOrder(o order.Order) {
 				s.newSlPrice = 0
 				s.newTpPrice = 0
 
-			} else if o.Status == order.Rejected {
+			} else if o.Status == order.RejectedOrder {
 				s.broker.Printf("main order %v rejected", o)
 			}
 
-		} else if o.Status == order.Rejected {
+		} else if o.Status == order.RejectedOrder {
 			s.broker.Printf("ctg order rejected: %v", o)
 		}
 	}

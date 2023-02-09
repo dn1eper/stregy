@@ -1,15 +1,15 @@
-package bt
+package core
 
 import (
 	"stregy/internal/domain/order"
 )
 
-func (b *Backtester) GetBalance(stratexecID string) (float64, error) {
+func (b *Backtest) GetBalance(stratexecID string) (float64, error) {
 	return b.balance, nil
 }
 
-func (b *Backtester) updateBalance(o *order.Order) {
-	if o == nil || o.Status != order.Filled || o.Position.MainOrder.ID == o.ID {
+func (b *Backtest) updateBalance(o *order.Order) {
+	if o == nil || o.Status != order.FilledOrder || o.Position.MainOrder.ID == o.ID {
 		return
 	}
 

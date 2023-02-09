@@ -1,4 +1,4 @@
-package bt
+package core
 
 import (
 	"stregy/internal/domain/order"

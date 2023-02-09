@@ -1,11 +1,11 @@
-package bt
+package core
 
 import (
 	"stregy/internal/domain/order"
 	"stregy/pkg/utils"
 )
 
-func (b *Backtester) executeOrder(o *order.Order, price float64) {
+func (b *Backtest) executeOrder(o *order.Order, price float64) {
 	isContingent := (o.ID != o.Position.MainOrder.ID)
 	if isContingent {
 		o.Size = utils.Min(o.Size, o.Position.Size)
@@ -14,7 +14,7 @@ func (b *Backtester) executeOrder(o *order.Order, price float64) {
 		o.Position.Size = o.Size
 	}
 
-	o.Status = order.Filled
+	o.Status = order.FilledOrder
 	o.ExecutionPrice = price
 	o.FCTime = b.curTime
 	delete(b.orders, o.ID)
@@ -29,7 +29,7 @@ func (b *Backtester) executeOrder(o *order.Order, price float64) {
 	}
 }
 
-func (b *Backtester) activateContingentOrders(o *order.Order) {
+func (b *Backtest) activateContingentOrders(o *order.Order) {
 	for _, oCtg := range o.Position.CtgOrders {
 		b.submitOrder(oCtg)
 	}

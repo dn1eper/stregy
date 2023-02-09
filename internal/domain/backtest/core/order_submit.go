@@ -1,10 +1,10 @@
-package bt
+package core
 
 import (
 	"stregy/internal/domain/order"
 )
 
-func (b *Backtester) SubmitOrder(o order.Order, ctgOrders ...order.Order) (*order.Order, error) {
+func (b *Backtest) SubmitOrder(o order.Order, ctgOrders ...order.Order) (*order.Order, error) {
 	err := checkIsValidOrder(&o)
 	if err != nil {
 		return nil, err
@@ -13,7 +13,7 @@ func (b *Backtester) SubmitOrder(o order.Order, ctgOrders ...order.Order) (*orde
 	for _, oCtg := range ctgOrders {
 		err = checkIsValidCtgOrder(&oCtg, &o)
 		if err != nil {
-			o.Status = order.Rejected
+			o.Status = order.RejectedOrder
 			return nil, err
 		}
 	}
@@ -25,7 +25,7 @@ func (b *Backtester) SubmitOrder(o order.Order, ctgOrders ...order.Order) (*orde
 
 	for _, oCtg := range ctgOrders {
 		oCtg.ID = b.newOrderID()
-		oCtg.Status = order.Inactive
+		oCtg.Status = order.InactiveOrder
 		oCtg.Position = p
 		o.Position.CtgOrders = append(o.Position.CtgOrders, oCtg.Copy())
 	}
@@ -33,7 +33,7 @@ func (b *Backtester) SubmitOrder(o order.Order, ctgOrders ...order.Order) (*orde
 	return (&o).Copy(), nil
 }
 
-func (b *Backtester) AddCtgOrder(posID int64, o order.Order) (*order.Order, error) {
+func (b *Backtest) AddCtgOrder(posID int64, o order.Order) (*order.Order, error) {
 	p, ok := b.positions[posID]
 	if !ok {
 		return nil, &PositionNotFoundError{posID}
@@ -48,8 +48,8 @@ func (b *Backtester) AddCtgOrder(posID int64, o order.Order) (*order.Order, erro
 	return (&o).Copy(), nil
 }
 
-func (b *Backtester) submitOrder(o *order.Order) {
-	o.Status = order.Submitted
+func (b *Backtest) submitOrder(o *order.Order) {
+	o.Status = order.SubmittedOrder
 	o.SubmissionTime = b.curTime
 
 	b.orders[o.ID] = o
@@ -58,13 +58,13 @@ func (b *Backtester) submitOrder(o *order.Order) {
 	b.logger.LogOrderStatusChange(o)
 }
 
-func (b *Backtester) newOrderID() int64 {
+func (b *Backtest) newOrderID() int64 {
 	id := b.orderCount
 	b.orderCount += 1
 	return id
 }
 
-func (b *Backtester) newPositionID() int64 {
+func (b *Backtest) newPositionID() int64 {
 	id := b.positionCount
 	b.positionCount += 1
 	return id

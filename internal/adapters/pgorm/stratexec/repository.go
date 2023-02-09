@@ -1,7 +1,7 @@
 package stratexec
 
 import (
-	"stregy/internal/domain/bt"
+	btcore "stregy/internal/domain/backtest/core"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -15,22 +15,22 @@ func NewRepository(client *gorm.DB) *repository {
 	return &repository{db: client}
 }
 
-func (r *repository) Create(backtester bt.Backtester) (*bt.Backtester, error) {
+func (r *repository) Create(backtest btcore.Backtest) (*btcore.Backtest, error) {
 	se := &StrategyExecution{
-		StrategyName: backtester.StrategyName,
-		TimeframeSec: backtester.TimeframeSec,
-		SymbolName:   backtester.Symbol.Name,
-		StartTime:    backtester.StartTime,
-		EndTime:      backtester.EndTime,
-		Status:       StrategyExecutionStatus(backtester.Status),
+		StrategyName: backtest.StrategyName,
+		TimeframeSec: backtest.TimeframeSec,
+		SymbolName:   backtest.Symbol.Name,
+		StartTime:    backtest.StartTime,
+		EndTime:      backtest.EndTime,
+		Status:       StrategyExecutionStatus(backtest.Status),
 	}
 	result := r.db.Create(se)
 	if result.Error != nil {
 		return nil, result.Error
 	}
 
-	backtester.ID = se.StrategyExecutionId.String()
-	return &backtester, nil
+	backtest.ID = se.StrategyExecutionId.String()
+	return &backtest, nil
 }
 
 func (r *repository) Get(id string) (*StrategyExecution, error) {
@@ -44,7 +44,7 @@ func (r *repository) Get(id string) (*StrategyExecution, error) {
 	return strategyExecution, result.Error
 }
 
-func (r *repository) GetBacktest(id string) (*bt.Backtester, error) {
+func (r *repository) GetBacktest(id string) (*btcore.Backtest, error) {
 	strategyExecution, err := r.Get(id)
 	if err != nil {
 		return nil, err

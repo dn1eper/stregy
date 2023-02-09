@@ -1,8 +1,8 @@
-package bt
+package core
 
 import "fmt"
 
-func (b *Backtester) ChangeOrderPrice(id int64, price float64) error {
+func (b *Backtest) ChangeOrderPrice(id int64, price float64) error {
 	if price <= 0 {
 		return fmt.Errorf("price must be greater than 0")
 	}
