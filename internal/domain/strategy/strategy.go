@@ -9,6 +9,7 @@ import (
 type Strategy interface {
 	Name() string
 	OnQuote(q quote.Quote, timeframe int)
+	OnTick(price float64)
 	OnOrder(o order.Order)
 
 	QuoteTimeframesNeeded() []int

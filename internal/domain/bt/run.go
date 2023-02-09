@@ -2,86 +2,114 @@ package bt
 
 import (
 	"fmt"
-	"os"
 	"path"
+	"stregy/internal/domain/broker"
 	"stregy/internal/domain/order"
 	"stregy/internal/domain/quote"
 	strategy1 "stregy/internal/domain/strategy"
 	"stregy/pkg/logging"
+	"time"
 )
 
-var strategy strategy1.Strategy
+func (b *Backtester) Time() time.Time {
+	return b.curTime
+}
+func (b *Backtester) Price() float64 {
+	return b.lastPrice
+}
 
-func (backtest *Backtest) RunOnQuotes(s strategy1.Strategy, quotes <-chan quote.Quote, firstQuote quote.Quote) error {
-	loggingConfig = LoggingConfig{LogOrderStatusChange: false, PricePrecision: backtest.Symbol.Precision}
-	InitializeBacktester(s)
-
-	Time = firstQuote.Time
-	Price = firstQuote.Open
-	InitLogger(backtest.ID + ".log")
-	Printf("running backtest with strategy strat1 on period period [%s; %s]", backtest.StartTime.Format("2006-01-02 15:04:05"), backtest.EndTime.Format("2006-01-02 15:04:05"))
-
-	quoteGen, err := NewQuoteGenerator(s, backtest.TimeframeSec, firstQuote)
+func (b *Backtester) BacktestOnQuotes(s strategy1.Strategy, quotes <-chan quote.Quote, firstQuote quote.Quote) error {
+	b.init(s)
+	b.curTime = firstQuote.Time
+	b.lastPrice = firstQuote.Open
+	quoteGen, err := NewQuoteGenerator(s, b.TimeframeSec, firstQuote)
 	if err != nil {
 		return err
 	}
+	b.Printf("running backtest with strategy strat1 on period period [%s; %s]", b.StartTime.Format("2006-01-02 15:04:05"), b.EndTime.Format("2006-01-02 15:04:05"))
 
-	qCount := 0
-	for q := range quotes {
-		Time = q.Time
-		Price = q.Close
-
-		for _, o := range orders {
-			if o.Type == order.Limit {
-				if o.Diraction == order.Long {
-					if q.Low <= o.Price {
-						executeOrder(o, o.Price)
-						continue
-					}
-				} else {
-					if q.High >= o.Price {
-						executeOrder(o, o.Price)
-						continue
-					}
-				}
-			} else if o.Type == order.StopMarket {
-				if o.Price >= q.Low && o.Price <= q.High {
-					executeOrder(o, q.Close)
-					continue
-				}
-			} else if o.Type == order.Market {
-				executeOrder(o, q.Close)
-				continue
-			}
-		}
-
-		// debug breaker
-		qCount += 1
-		if qCount == 3601 {
-			break
-		}
-
-		quoteGen.OnQuote(q)
-	}
-
-	wd, _ := os.Getwd()
-	reportDir := path.Join(wd, "reports")
-	os.Mkdir(reportDir, os.ModePerm)
-	err = backtest.AccountHistoryService.CreateReport(orderHistory, backtest.Symbol, path.Join(reportDir, backtest.ID+".csv"))
-	if err != nil {
-		logging.GetLogger().Error(fmt.Sprintf("Error creating backtest report: %v", err))
-	}
+	b.runOnQuotes(quotes, quoteGen)
 
 	return nil
 }
 
-func InitializeBacktester(s strategy1.Strategy) {
-	strategy = s
-	orders = make(map[int64]*order.Order)
-	positions = make(map[int64]*order.Position)
+func (b *Backtester) CreateReport(location string) {
+	reportPath := ""
+	if location == "" {
+		reportPath = b.getDefaultReportPath()
+	} else {
+		reportPath = path.Join(location, b.ID+".csv")
+	}
+
+	err := b.AccountHistoryService.CreateReport(b.orderHistory, b.Symbol, reportPath)
+	if err != nil {
+		logging.GetLogger().Error(fmt.Sprintf("Error creating backtest report: %v", err))
+	}
 }
 
-func Terminate() {
-	Print("Terminated")
-	os.Exit(0)
+func (b *Backtester) init(s strategy1.Strategy) {
+	b.initLogger()
+
+	b.strategy = s
+	b.orders = make(map[int64]*order.Order)
+	b.positions = make(map[int64]*order.Position)
+	b.termChan = make(chan bool)
+}
+
+func (b *Backtester) initLogger() {
+	loggerCfg := broker.LoggingConfig{LogOrderStatusChange: false, PricePrecision: b.Symbol.Precision}
+	b.logger = *broker.NewLogger(b.ID+".log", loggerCfg, b)
+}
+
+func (b *Backtester) runOnQuotes(quotes <-chan quote.Quote, quoteGen *quoteGenerator) {
+	run := true
+	for run {
+		select {
+		case q, ok := <-quotes:
+			if !ok {
+				run = false
+				break
+			}
+
+			b.curTime = q.Time
+			b.lastPrice = q.Close
+
+			b.strategy.OnTick(q.Close)
+
+			for _, o := range b.orders {
+				if o.Type == order.Limit {
+					if o.Diraction == order.Long {
+						if q.Low <= o.Price {
+							b.executeOrder(o, b.lastPrice)
+							continue
+						}
+					} else {
+						if q.High >= o.Price {
+							b.executeOrder(o, b.lastPrice)
+							continue
+						}
+					}
+				} else if o.Type == order.StopMarket {
+					if o.Price >= q.Low && o.Price <= q.High {
+						b.executeOrder(o, q.Close)
+						continue
+					}
+				} else if o.Type == order.Market {
+					b.executeOrder(o, q.Close)
+					continue
+				}
+			}
+
+			quoteGen.OnQuote(q)
+
+		case <-b.termChan:
+			run = false
+		}
+	}
+}
+
+func (b *Backtester) Terminate() {
+	b.Status = Terminated
+	b.termChan <- true
+	b.logger.Print("Terminated")
 }

@@ -7,12 +7,9 @@ import (
 )
 
 type Position struct {
-	ID          uuid.UUID `gorm:"primaryKey;type:uuid;default:uuid_generate_v4()"`
-	Num         int64     `gorm:"type:integer"`
-	MainOrder   order.Order
-	StopOrder   order.Order
-	TakeOrder   order.Order
-	MainOrderId uuid.UUID
-	StopOrderId uuid.UUID
-	TakeOrderId uuid.UUID
+	ID          uuid.UUID   `gorm:"primaryKey;type:uuid;default:uuid_generate_v4()"`
+	Num         int64       `gorm:"type:integer"`
+	MainOrder   order.Order `gorm:"foreignKey:MainOrderID"`
+	MainOrderID uuid.UUID
+	Orders      []order.Order
 }

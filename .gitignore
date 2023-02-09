@@ -2,4 +2,5 @@
 pyoutliers
 logs
 repository/
+reports
 *.exe

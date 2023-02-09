@@ -1,57 +1,54 @@
 package strat1
 
 import (
-	"stregy/internal/domain/bt"
+	"stregy/internal/domain/broker"
 	"stregy/internal/domain/order"
-	"stregy/internal/domain/quote"
 	"stregy/internal/domain/strategy"
-	"stregy/pkg/logging"
+	"stregy/local/strategies/posmerge"
 	"time"
 )
 
-var logger logging.Logger
+type strat1 struct {
+	broker         broker.Broker
+	positionMerger posmerge.PositionMerger
 
-var prevClose float64
+	newMainOrder *order.Order
+	newSlPrice   float64
+	newTpPrice   float64
 
-type Strategy struct {
+	totalAverages      int
+	nextAveragingPrice float64
+	mergedPosition     *posmerge.MergedPosition
+
+	prevClose      float64
+	prevClosesUp   int
+	prevClosesDown int
 }
 
-func NewStrategy() *Strategy {
-	logger = logging.GetLogger()
+func NewStrategy(broker broker.Broker) strategy.Strategy {
+	positionMerger := posmerge.NewPositionMerger(broker)
+	strat := strat1{
+		broker:         broker,
+		positionMerger: positionMerger}
+	positionMerger.SetCallbackObject(&strat)
 
-	return &Strategy{}
+	return &strat
 }
 
-func (s *Strategy) Name() string {
+func (s *strat1) Name() string {
 	return "strat1"
 }
 
-func (s *Strategy) OnOrder(o order.Order) {
-	bt.PrintOrder(&o)
-}
-
-func (s *Strategy) OnQuote(q quote.Quote, timeframe int) {
-	// bt.Printf("timeframe = %dm: %v", timeframe, quote)
-	if prevClose == 0 {
-		prevClose = q.Close
-	} else if q.Close > prevClose {
-		bt.SubmitContingentOrders(q.Close, 1, order.Long, order.Market, 100, 100)
-	} else if q.Close < prevClose {
-		bt.SubmitContingentOrders(q.Close, 1, order.Short, order.Market, 100, 100)
-	}
-	prevClose = q.Close
-}
-
-func (s *Strategy) PrimaryTimeframeSec() int {
+func (s *strat1) PrimaryTimeframeSec() int {
 	return 1
 }
 
-func (s *Strategy) QuoteTimeframesNeeded() []int {
+func (s *strat1) QuoteTimeframesNeeded() []int {
 	return []int{5}
 }
 
-func (s *Strategy) TimeBeforeCallbacks() time.Duration {
+func (s *strat1) TimeBeforeCallbacks() time.Duration {
 	return time.Minute * 0
 }
 
-var _ strategy.Strategy = (*Strategy)(nil)
+var _ strategy.Strategy = (*strat1)(nil)

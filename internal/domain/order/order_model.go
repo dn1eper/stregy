@@ -17,7 +17,6 @@ type Order struct {
 	Position       *Position
 }
 
-//go:generate stringer -type=OrderStatus
 type OrderStatus int64
 
 const (
@@ -27,6 +26,7 @@ const (
 	Partial
 	Filled
 	CancelledOrder
+	Rejected
 	Expired
 	Margin
 )
@@ -47,6 +47,20 @@ const (
 	Long OrderDiraction = iota
 	Short
 )
+
+func (o *Order) Copy() *Order {
+	return &Order{
+		ID:             o.ID,
+		Diraction:      o.Diraction,
+		Size:           o.Size,
+		Price:          o.Price,
+		Status:         o.Status,
+		Type:           o.Type,
+		SubmissionTime: o.SubmissionTime,
+		FCTime:         o.FCTime,
+		ExecutionPrice: o.ExecutionPrice,
+		Position:       o.Position}
+}
 
 func (od OrderDiraction) Opposite() OrderDiraction {
 	if od == Long {

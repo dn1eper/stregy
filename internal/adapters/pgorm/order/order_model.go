@@ -9,10 +9,11 @@ import (
 )
 
 type Order struct {
-	OrderId             uuid.UUID `gorm:"primaryKey;type:uuid;default:uuid_generate_v4()"`
+	ID                  uuid.UUID `gorm:"primaryKey;type:uuid;default:uuid_generate_v4()"`
+	PositionID          uuid.UUID `gorm:"type:uuid"`
 	Num                 int64     `gorm:"type:integer"`
-	StrategyExecution   stratexec.StrategyExecution
 	StrategyExecutionID uuid.UUID
+	StrategyExecution   stratexec.StrategyExecution
 	Price               float64        `gorm:"double precision;not null"`
 	Direction           OrderDirection `gorm:"type:order_direction"`
 	Size                float64        `gorm:"double precision;not null"`

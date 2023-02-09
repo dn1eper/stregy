@@ -18,8 +18,8 @@ import (
 )
 
 type Service interface {
-	Create(dto BacktestDTO) (*bt.Backtest, error)
-	Launch(bt *bt.Backtest) error
+	Create(dto BacktestDTO) (*bt.Backtester, error)
+	Launch(bt *bt.Backtester) error
 	Run() error
 }
 
@@ -52,8 +52,8 @@ func NewService(
 	}
 }
 
-func (s *service) Create(dto BacktestDTO) (*bt.Backtest, error) {
-	bt := bt.Backtest{
+func (s *service) Create(dto BacktestDTO) (*bt.Backtester, error) {
+	bt := bt.Backtester{
 		StrategyName: dto.StrategyName,
 		StartTime:    dto.StartDate,
 		EndTime:      dto.EndDate,
@@ -64,10 +64,10 @@ func (s *service) Create(dto BacktestDTO) (*bt.Backtest, error) {
 	return s.repository.Create(bt)
 }
 
-func (s *service) Launch(backtest *bt.Backtest) (err error) {
+func (s *service) Launch(backtester *bt.Backtester) (err error) {
 	// check strategy exists
 	wd, _ := os.Getwd()
-	strategyFilePath := path.Join(wd, "local", "strategies", backtest.StrategyName, "strategy.go")
+	strategyFilePath := path.Join(wd, "local", "strategies", backtester.StrategyName, "strategy.go")
 	if _, err := os.Stat(strategyFilePath); err != nil {
 		return errors.New("strategy not found")
 	}
@@ -75,7 +75,7 @@ func (s *service) Launch(backtest *bt.Backtest) (err error) {
 	// import strategy needed
 	filePath := path.Join(wd, "internal", "domain", "btservice", "service.go")
 	importLine := "\tstrategy \"stregy/local/strategies/defaultstrat\""
-	newImportLine := fmt.Sprintf("\tstrategy \"stregy/local/strategies/%s\"", backtest.StrategyName)
+	newImportLine := fmt.Sprintf("\tstrategy \"stregy/local/strategies/%s\"", backtester.StrategyName)
 	err = utils.ReplaceFirstLineInFile(filePath, importLine, newImportLine)
 	if err != nil {
 		return err
@@ -83,7 +83,7 @@ func (s *service) Launch(backtest *bt.Backtest) (err error) {
 
 	// run
 	go func() {
-		executableName := fmt.Sprintf("%s.exe", backtest.ID)
+		executableName := fmt.Sprintf("%s.exe", backtester.ID)
 		cmd := exec.Command("go", "build", "-o", executableName, "cmd/main.go")
 		err = cmd.Run()
 		utils.ReplaceFirstLineInFile(filePath, newImportLine, importLine)
@@ -93,7 +93,7 @@ func (s *service) Launch(backtest *bt.Backtest) (err error) {
 		}
 
 		executablePath := fmt.Sprintf("%s\\%s", wd, executableName)
-		cmd = exec.Command(executablePath, "--backtest", backtest.ID)
+		cmd = exec.Command(executablePath, "--backtest", backtester.ID)
 		defer func() {
 			os.Remove(executablePath)
 		}()
@@ -114,23 +114,25 @@ func (s *service) Run() (err error) {
 		}
 	}()
 
-	if len(os.Args) < 2 {
-		return errors.New("backtest id not provided")
-	}
-
-	backtest, err := s.repository.GetBacktest(os.Args[2])
+	backtestID, reportLocation, err := parseArgs()
 	if err != nil {
 		return err
 	}
-	backtest.AccountHistoryService = s.accHistoryService
-	backtest.Symbol = *s.getSymbol(backtest.Symbol.Name)
 
-	var strat strategy1.Strategy = strategy.NewStrategy()
+	backtester, err := s.repository.GetBacktest(backtestID)
+	if err != nil {
+		return err
+	}
+	backtester.AccountHistoryService = s.accHistoryService
+	backtester.Symbol = *s.getSymbol(backtester.Symbol.Name)
+
+	var strat strategy1.Strategy = strategy.NewStrategy(backtester)
 
 	// backtest
-	serviceLogger.Info(fmt.Sprintf("running backtest with strategy %v on period [%s; %s]", strat.Name(), backtest.StartTime.Format("2006-01-02 15:04:05"), backtest.EndTime.Format("2006-01-02 15:04:05")))
-	quotes, firstQuote := s.quoteService.Get(backtest.Symbol.Name, backtest.StartTime, backtest.EndTime, backtest.TimeframeSec)
-	backtest.RunOnQuotes(strat, quotes, firstQuote)
+	serviceLogger.Info(fmt.Sprintf("running backtest with strategy %v on period [%s; %s]", strat.Name(), backtester.StartTime.Format("2006-01-02 15:04:05"), backtester.EndTime.Format("2006-01-02 15:04:05")))
+	quotes, firstQuote := s.quoteService.Get(backtester.Symbol.Name, backtester.StartTime, backtester.EndTime, backtester.TimeframeSec)
+	backtester.BacktestOnQuotes(strat, quotes, firstQuote)
+	backtester.CreateReport(reportLocation)
 
 	return err
 }
@@ -142,4 +144,17 @@ func (s *service) getSymbol(name string) *symbol.Symbol {
 	}
 
 	return smbl
+}
+
+func parseArgs() (backtestID string, reportLocation string, err error) {
+	if len(os.Args) < 2 {
+		return "", "", errors.New("backtest id not provided")
+	}
+	backtestID = os.Args[2]
+
+	if len(os.Args) >= 3 {
+		reportLocation = os.Args[3]
+	}
+
+	return backtestID, reportLocation, nil
 }

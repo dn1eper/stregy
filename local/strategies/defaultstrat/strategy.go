@@ -24,6 +24,9 @@ func (s *Strategy) OnOrder(o order.Order) {
 func (s *Strategy) OnQuote(q quote.Quote, timeframe int) {
 }
 
+func (s *Strategy) OnTick(price float64) {
+}
+
 func (s *Strategy) PrimaryTimeframeSec() int {
 	return 60
 }

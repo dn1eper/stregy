@@ -1,10 +1,17 @@
 ## today
-make balance available
+commit
+domain specific error types(at least for trading)
 create new name for order and position module, change pgorm adapter as well
 merge bt and bt service?
+fork -> deepsource
+TradingHistoryPlotter
+    set market order exec price as submission price
+make balance available
 
 ## future
-send logging config when creating backtest
+posmerge
+    save all orders of MergedPosition(to be able to analyze what went wrong)
+send logging config when creating backtester
 test quotes generator
 add ability to add sl tp after submitting order
 delete submitted status in order?

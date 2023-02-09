@@ -33,8 +33,8 @@ type StrategyExecution struct {
 	Status              StrategyExecutionStatus `gorm:"type:strategy_execution_status;not null"`
 }
 
-func (s *StrategyExecution) ToBacktest() *bt.Backtest {
-	return &bt.Backtest{
+func (s *StrategyExecution) ToBacktest() *bt.Backtester {
+	return &bt.Backtester{
 		ID:           s.StrategyExecutionId.String(),
 		StrategyName: s.StrategyName,
 		StartTime:    s.StartTime,

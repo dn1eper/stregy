@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"stregy/internal/adapters/api"
 	userapi "stregy/internal/adapters/api/user"
+	"stregy/internal/config"
 	"stregy/internal/domain/btservice"
 	"stregy/internal/domain/exgaccount"
 	"stregy/internal/domain/user"
@@ -16,7 +17,7 @@ import (
 )
 
 const (
-	backtestURL = "/api/backtest"
+	backtesterURL = "/api/backtester"
 )
 
 type handler struct {
@@ -38,7 +39,7 @@ func NewHandler(
 func (h *handler) Register(router *httprouter.Router) {
 	createSEHandler := handlers.JsonHandler(h.backtestHandler, &BacktesterDTO{})
 	userHandler := userapi.AuthenticationHandler(createSEHandler, h.userService)
-	router.POST(backtestURL, handlers.ToSimpleHandler(userHandler))
+	router.POST(backtesterURL, handlers.ToSimpleHandler(userHandler))
 }
 
 func (h *handler) backtestHandler(
@@ -47,6 +48,7 @@ func (h *handler) backtestHandler(
 	params httprouter.Params,
 	args map[string]interface{},
 ) {
+	cfg := config.GetConfig()
 	logger := logging.GetLogger()
 	// Parse and validate request.
 	user := user.User{}
@@ -72,11 +74,13 @@ func (h *handler) backtestHandler(
 	}
 
 	// Execute.
-	err = h.backtesterService.Launch(btDomain)
-	if err != nil {
-		logger.Error(err.Error())
-		handlers.ReturnError(w, http.StatusInternalServerError, err.Error())
-		return
+	if !*cfg.IsDebug {
+		err = h.backtesterService.Launch(btDomain)
+		if err != nil {
+			logger.Error(err.Error())
+			handlers.ReturnError(w, http.StatusInternalServerError, err.Error())
+			return
+		}
 	}
 
 	handlers.JsonResponseWriter(w, map[string]string{"backtest_id": btDomain.ID})

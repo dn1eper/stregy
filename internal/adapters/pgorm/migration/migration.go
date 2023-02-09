@@ -9,7 +9,6 @@ import (
 	"stregy/internal/adapters/pgorm/stratexec"
 	"stregy/internal/adapters/pgorm/symbol"
 	"stregy/internal/adapters/pgorm/tick"
-	"stregy/internal/adapters/pgorm/user"
 
 	"gorm.io/gorm"
 )
@@ -28,15 +27,14 @@ func createExtensions(db *gorm.DB) error {
 }
 
 func Migrate(db *gorm.DB) error {
-	err := createExtensions(db)
-	if err != nil {
+	if err := createExtensions(db); err != nil {
 		return err
 	}
-	err = createDatatypes(db)
-	if err != nil {
+	if err := createDatatypes(db); err != nil {
 		return err
 	}
-	return db.AutoMigrate(&user.User{}, &symbol.Symbol{}, &tick.Tick{},
+
+	return db.AutoMigrate(&symbol.Symbol{}, &tick.Tick{},
 		&quote.Quote{}, &exchange.Exchange{}, &exgaccount.ExchangeAccount{},
-		&stratexec.StrategyExecution{}, &order.Order{}, &position.Position{})
+		&stratexec.StrategyExecution{}, &position.Position{}, &order.Order{})
 }

@@ -33,7 +33,7 @@ func (accountHistoryReporter) CreateReport(orders []*order.Order, s symbol.Symbo
 			"%d,%d,%s,%s,%s,%f,%s,%s,%s,%s\n",
 			o.ID,
 			o.Position.ID,
-			getOrderContingentType(o),
+			getOrderContingentTypeString(o),
 			o.Diraction.String(),
 			o.Type.String(),
 			o.Size,
@@ -46,19 +46,13 @@ func (accountHistoryReporter) CreateReport(orders []*order.Order, s symbol.Symbo
 	return nil
 }
 
-func getOrderContingentType(o *order.Order) string {
-	p := o.Position
-	if p.MainOrder.ID == o.ID {
-		return "Main"
-	}
-	if p.StopOrder.ID == o.ID {
-		return "SL"
-	}
-	if p.TakeOrder.ID == o.ID {
-		return "TP"
+func getOrderContingentTypeString(o *order.Order) string {
+	res := "Cont"
+	if o.Position.MainOrder.ID == o.ID {
+		res = "Main"
 	}
 
-	panic("order does not belong to its position")
+	return res
 }
 
 func FormatPrice(f float64, precision int) string {

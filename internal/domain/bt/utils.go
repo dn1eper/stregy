@@ -1,15 +1,13 @@
 package bt
 
 import (
-	"strconv"
-	"stregy/internal/domain/order"
+	"os"
+	"path"
 )
 
-func PrintOrder(o *order.Order) {
-	price := strconv.FormatFloat(o.Price, 'f', loggingConfig.PricePrecision, 64)
-	Printf("Order #%d %s: %s %s", o.ID, o.Status.String(), price, o.Diraction.String())
-}
-
-func PrintOrderStatus(o *order.Order) {
-	Printf("Order #%d: %s", o.ID, o.Status.String())
+func (b *Backtester) getDefaultReportPath() string {
+	wd, _ := os.Getwd()
+	reportDir := path.Join(wd, "reports")
+	os.Mkdir(reportDir, os.ModePerm)
+	return path.Join(reportDir, b.ID+".csv")
 }
