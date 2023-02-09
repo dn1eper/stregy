@@ -1,14 +1,13 @@
 package bt
 
 import (
-	"fmt"
 	"stregy/internal/domain/order"
 )
 
 func (b *Backtester) CancelOrder(id int64) error {
 	o, ok := b.orders[id]
 	if !ok {
-		return fmt.Errorf("order not found")
+		return &OrderNotFoundError{id}
 	}
 
 	delete(b.orders, id)

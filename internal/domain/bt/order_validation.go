@@ -7,10 +7,10 @@ import (
 
 func checkIsValidOrder(o *order.Order) (err error) {
 	if o.Size <= 0 {
-		return fmt.Errorf("invalid order size %v", o.Size)
+		return &InvalidOrderError{o.ID, fmt.Errorf("size is less than zero")}
 	}
 	if o.Price <= 0 && o.Type != order.Market {
-		return fmt.Errorf("invalid order price %v", o.Price)
+		return &InvalidOrderError{o.ID, fmt.Errorf("price is less than zero")}
 	}
 	err = checkIsSupportedOrderType(o)
 
@@ -24,10 +24,10 @@ func checkIsValidCtgOrder(o, mainOrder *order.Order) (err error) {
 	}
 
 	if o.Size > mainOrder.Size {
-		return fmt.Errorf("contingent order size is greater than main order size")
+		return &InvalidOrderError{o.ID, fmt.Errorf("contingent order size is greater than main order size")}
 	}
 	if o.Diraction != mainOrder.Diraction.Opposite() {
-		return fmt.Errorf("contingent order diraction is not opposite")
+		return &InvalidOrderError{o.ID, fmt.Errorf("contingent order diraction is not opposite")}
 	}
 
 	return nil

@@ -1,7 +1,6 @@
 package bt
 
 import (
-	"fmt"
 	"stregy/internal/domain/order"
 )
 
@@ -37,7 +36,7 @@ func (b *Backtester) SubmitOrder(o order.Order, ctgOrders ...order.Order) (*orde
 func (b *Backtester) AddCtgOrder(posID int64, o order.Order) (*order.Order, error) {
 	p, ok := b.positions[posID]
 	if !ok {
-		return nil, fmt.Errorf("posion %d not found", posID)
+		return nil, &PositionNotFoundError{posID}
 	}
 	if err := checkIsValidCtgOrder(&o, p.MainOrder); err != nil {
 		return nil, err

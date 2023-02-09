@@ -9,7 +9,7 @@ func (b *Backtester) ChangeOrderPrice(id int64, price float64) error {
 
 	o, ok := b.orders[id]
 	if !ok {
-		return fmt.Errorf("Order %d not found", id)
+		return &OrderNotFoundError{id}
 	}
 
 	o.Price = price
